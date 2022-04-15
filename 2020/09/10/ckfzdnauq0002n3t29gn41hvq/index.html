@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="个人不完全技术博客"><title>GIT Flow流程管理规范 | Lee Blog</title><link rel="stylesheet" type="text/css" href="/leeblog/css/style.css?v=1.0.0"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/normalize.css/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/pure-min.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/leeblog/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/leeblog/favicon.ico"><link rel="apple-touch-icon" href="/leeblog/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/leeblog/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/leeblog/atom.xml"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/clipboard/dist/clipboard.min.js"></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.css"><meta name="generator" content="Hexo 5.1.1"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">GIT Flow流程管理规范</h1><a id="logo" href="/leeblog/.">Lee Blog</a><p class="description">Less is more.  enmm... except hair</p></div><div id="nav-menu"><a class="current" href="/leeblog/."><i class="fa fa-home"> 首页</i></a><a href="/leeblog/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/leeblog/about/"><i class="fa fa-user"> 关于</i></a><a href="/leeblog/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">GIT Flow流程管理规范</h1><div class="post-meta">2020-09-10<span> | </span><span class="category"><a href="/leeblog/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> 阅读</span></span></div><div class="clear"><div class="toc-article" id="toc"><div class="toc-title">文章目录</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-number">2.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%92%E4%BB%B6%E4%BD%BF%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">插件使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%A9-%E5%88%86%E6%94%AF%E7%AE%A1%E7%90%86%E8%AF%A6%E7%BB%86"><span class="toc-number">4.</span> <span class="toc-text">扩:分支管理详细</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B4%E5%A4%9A%E5%8F%AF%E5%8F%82%E8%80%83"><span class="toc-number">5.</span> <span class="toc-text">更多可参考:</span></a></li></ol></div></div><div class="post-content"><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a><strong>简介</strong></h2><blockquote>
+<p>Git Flow Integration插件是基于git flow(开发流程管理模型)的idea插件。  </p>
+</blockquote>
+<p>git flow开发流程管理模型主要使用五类分支：  </p>
+<ul>
+<li>master 主分支:生产环境部署分支, master分支永远与生产环境部署的版本保持同步。  </li>
+<li>develop 开发分支:永远是下一个版本中已开发完成的新特性的最新代码。 </li>
+<li>feature/功能名称: 新功能开发分支,为具体某一新功能开发而存在的临时分支,开发完成后合并回develop分支,并删除。 </li>
+<li>release/版本号:预上线分支,版本中所有功能开发完毕并合并到develop以后,从develop开出release分支进行整体测试，测试稳定后打上tag同时并入develop、master分支。  </li>
+<li>hotfix/bug:生产环境bug修复分支,修复后双向合并到develop和master。   </li>
+</ul>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a><strong>安装</strong></h2><ul>
+<li>Git Flow Integration依赖于本地git flow，所以先安装git flow软件包:  <blockquote>
+<p>执行<code>git flow version</code> 检查是否已安装</p>
+</blockquote>
+<ul>
+<li>Ubuntu or Debian安装<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">apt-get install git-flow </span><br></pre></td></tr></table></figure></li>
+<li>Archlinux 安装<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yaourt -S gitflow-avh </span><br></pre></td></tr></table></figure></li>
+<li>Windows安装<br>请参考 <a target="_blank" rel="noopener" href="https://juejin.im/post/6844903682027307022">Windows下gitflow的安装方法</a>  </li>
+</ul>
+</li>
+<li>安装Idea插件<br>idea中<code>File</code>-&gt;<code>Setting</code>-&gt;<code>Plugins</code>搜索安装即可  <img src="https://s1.ax1x.com/2020/09/16/wc7rmd.png" width="100%">  
+
+
+</li>
+</ul>
+<h2 id="插件使用"><a href="#插件使用" class="headerlink" title="插件使用"></a><strong>插件使用</strong></h2><ol>
+<li><p>安装并重启idea后,右下角出现<code>No Gitflow</code>  </p>
+  <img src="https://s1.ax1x.com/2020/09/16/wc7Imj.png" width="100%"></li>
+<li><p>点击init repo进行初始化<br><em>注：git flow init之前请确保本地没有尚未提交的更改</em>  </p>
+<img src="https://s1.ax1x.com/2020/09/16/wc7jcF.png" width="100%">
+</li>
+<li><p>确认后git flow自动基于master创建并切换到develop分支，并在右下角gitflow中出现操作选项    </p>
+<img src="https://s1.ax1x.com/2020/09/16/wcHp7R.png" width="100%">
+
+ <figure class="highlight asciidoc"><table><tr><td class="code"><pre><span class="line"><span class="bullet">* </span>新功能开发分支线（feature）</span><br><span class="line"><span class="bullet">* </span>开发版本bug修复线（bugfix）</span><br><span class="line"><span class="bullet">* </span>新版本发布线/预上线（release）</span><br><span class="line"><span class="bullet">* </span>生产版本bug修复线（hotfix）</span><br></pre></td></tr></table></figure></li>
+<li><p>开始使用，开发系统管理模块  </p>
+<img src="https://s1.ax1x.com/2020/09/16/wcHVje.png" width="100%">
+</li>
+<li><p>确认后自动生成feature为前缀的开发分支，并提供以下操作  </p>
+<img src="https://s1.ax1x.com/2020/09/16/wcHQ4P.jpg" width="70%">
+
+</li>
+</ol>
+<p><code>Finish feature</code> 结束分支：合并当前开发分支至develop并删除当前开发分支<br><code>Publish feature</code>推送分支至远程仓库</p>
+<h2 id="扩-分支管理详细"><a href="#扩-分支管理详细" class="headerlink" title="扩:分支管理详细"></a>扩:分支管理详细</h2><ul>
+<li>master<ul>
+<li>主分支, 随项目一直存在的长期分支.</li>
+<li>master分支HEAD所在的位置, 永远是当前生产环境的代码.</li>
+<li>master分支不允许直接提交代码, 仅允许从release或者hotfix分支通过merge request合并代码.</li>
+</ul>
+</li>
+<li>develop<ul>
+<li>开发分支, 随项目一直存在的长期分支.</li>
+<li>develop分支的HEAD所在的位置, 永远是下一个版本中已开发完成的新特性的最新代码.</li>
+<li>develop分支的代码每天自动构建并部署到测试环境.</li>
+<li>develop分支不允许直接提交代码, 仅允许从feature, release或者hotfix分支通过merge request合并代码.</li>
+<li>当develop分支中下一个版本的新特性已经全部开发完毕后, 从develop分支开出release分支, 进入测试阶段.</li>
+<li>在下个版本的release分支创建之前, 非下个版本的feature分支不允许向develop分支合并.</li>
+</ul>
+</li>
+<li>feature分支<ul>
+<li>feature分支是一类以feature/为前缀(gitflow默认值, 可以更换)的分支的统称.</li>
+<li>每一个feature分支从develop分支新建, 进行<strong>某一个功能</strong>的开发. 功能开发并测试稳定后, feature分支将合并回develop分支.</li>
+<li>同一个人可以同时开发多个feature分支, 同一个feature分支也可以同时被多个人开发.</li>
+<li>多个feature同时开发的情形, 后开发完的分支在最后合并回develop时, 往往会遇到冲突的情况. 此时一般遵循一下两种方法解决冲突.<ul>
+<li>先将最新的develop分支向当前feature分支进行合并, 然后再将当前feature分支合并回develop.</li>
+<li>先将当前的feature分支向最新的develop分支进行rebase, 然后再将当前feature分支合并回develop.</li>
+<li>两种方式的比较, 可以参考文章Merging vs. Rebasing, 或其中文版代码合并：Merge、Rebase 的选择</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>release分支<ul>
+<li>release分支是一类以release/为前缀(gitflow默认值, 可以更换)的分支的统称.</li>
+<li>develop分支上的下一个版本的所有新特性开发完毕, 从develop分支开出一个该版本的release分支, 并进行测试.</li>
+<li>release分支不允许进行新特性开发, 而只进行bug修复和更新版本mata信息(如版本号, 构建日期, 更新日志等), 并且可以不定期将新的bug修复改动合并回develop.</li>
+<li>当release充分测试稳定后, 同时合并进入master分支和develop分支, 并在master分支上的建议该release版本的TAG.</li>
+</ul>
+</li>
+<li>hotfix分支<ul>
+<li>当生产环境发现紧急bug时，可以通过新建hotfix分支，来修复bug, 修复后双向合并到develop和master.  </li>
+</ul>
+</li>
+</ul>
+<h2 id="更多可参考"><a href="#更多可参考" class="headerlink" title="更多可参考:"></a>更多可参考:</h2><p><a target="_blank" rel="noopener" href="https://www.git-tower.com/learn/git/ebook/cn/command-line/advanced-topics/git-flow">git-flow 的工作流程| Learn Version Control with Git</a><br><a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2015/12/git-workflow.html">Git 工作流程- 阮一峰的网络日志</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/153459671">git flow使用规范</a></p>
+<p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2020/09/10/GIT-Flow%E6%B5%81%E7%A8%8B%E7%AE%A1%E7%90%86%E8%A7%84%E8%8C%83/">leeblog.icu/2020/09/10/GIT-Flow流程管理规范/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>
+</div><div id="donate"><link rel="stylesheet" type="text/css" href="/leeblog/css/donate.css?v=1.0.0"><script type="text/javascript" src="/leeblog/js/donate.js?v=1.0.0" successtext="复制成功!"></script><a class="pos-f tr3" id="github" href="https://github.com/Kaiyuan/donate-page" target="_blank" title="Github"></a><div id="DonateText">Donate</div><ul class="list pos-f" id="donateBox"><li id="AliPay" qr="https://s1.ax1x.com/2020/10/07/0ahUHK.jpg"></li><li id="WeChat" qr="https://s1.ax1x.com/2020/10/07/0ahUHK.jpg"></li></ul><div class="pos-f left-100" id="QRBox"><div id="MainBox"></div></div></div><script type="text/javascript" src="/leeblog/js/share.js?v=1.0.0" async></script><a class="article-share-link" data-url="leeblog.icu/2020/09/10/ckfzdnauq0002n3t29gn41hvq/" data-id="ckfzdnauq0002n3t29gn41hvq" data-qrcode="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACLklEQVR42u3aQW7DMAwEwPz/0+41QGtnV3IKWBqdAjuNPD6wpMjXK17H23q/8vvu2TfP/vZsr9c3FgYGxmMZx+U6e5S7AGMv6A8qBgbGBozrwNf+dB6O830/PDMGBgbGSaBMYNffTK5jYGBgjDGu07vr9PF6dwwMDIyZIjbZPkkE80L3K7U4BgbGAxn5qfv/f/5KfwMDA+NRjKNc33isY3phYGCszcgDXH5AlpS182kfBgYGRjvOlZS47fFcPSiGgYGxKKM9uhoLi9d7tYNof9zFwMDYhjFTgtYxfmhoAwMDY2fGXflVnmK2TdAPdzEwMJZmjKWAeQk6dgyXJ45TmSwGBsajGO0oWHtYNtZayF8KBgbGDoyxCD12lJYUzEmYPsVjYGAsyhgrL9uA2I5WtNcxMDBWZeSAtrysU7oylGNgYOzDyBOvNslLSPPh+LQWx8DAWIhx16O35WvemIxCMwYGxgaMNr0bY7SBuJ4ZwcDAWJSRB7WW0TY+x9qf2XEiBgbGaoyZEDx26D/TKjgNuBgYGBswxo7h6vmOod0xMDAw2uGJPGi2hW6daGJgYCzKOMr1oRdalrUzI2ivtguBgYHxWEa+ZhqZ7cPNJIsYGBirMvKRiHvHXm9uJGBgYGzAuCuBm0lA86CPgYGB0R7DzeBnwnoxqYGBgbEZYywpzF9NPsZxw/8NDAyMRzHaA7X2ykzhGrUfMDAwlmbkjYH2p/M0MS9Zb+hvYGBgPInxA2abqHaoVG0ZAAAAAElFTkSuQmCC">分享</a><div class="tags"><a href="/leeblog/tags/GIT"><i class="fa fa-tag">GIT</i></a><a href="/leeblog/tags/开发规范"><i class="fa fa-tag">开发规范</i></a></div><div class="post-nav"><a class="pre" href="/leeblog/2020/09/13/ckfzdnaum0000n3t26ff5h968/">idea插件git commit template的使用与changeLog的生成</a><a class="next" href="/leeblog/2020/09/08/ckfzdnauu0006n3t2eq4dhet6/">Markdown语法与Pandoc转换</a></div><div id="lv-container" data-id="city" data-uid="MTAyMC81MTcwMC8yODE4MQ=="><script>(function(d, s) {
+  var j, e = d.getElementsByTagName(s)[0];
+  if (typeof LivereTower === 'function') { return; }
+  j = d.createElement(s);
+  j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+  j.async = true;
+  e.parentNode.insertBefore(j, e);
+})(document, 'script');
+</script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/leeblog/categories/%E6%8A%80%E6%9C%AF/">技术</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/leeblog/categories/%E6%8A%80%E6%9C%AF/java/">java</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/leeblog/categories/%E9%9A%8F%E7%AC%94/">随笔</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/leeblog/tags/GIT/" style="font-size: 15px;">GIT</a> <a href="/leeblog/tags/%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83/" style="font-size: 15px;">开发规范</a> <a href="/leeblog/tags/%E9%9A%8F%E7%AC%94/" style="font-size: 15px;">随笔</a> <a href="/leeblog/tags/%E6%96%87%E6%A1%A3/" style="font-size: 15px;">文档</a> <a href="/leeblog/tags/java/" style="font-size: 15px;">java</a> <a href="/leeblog/tags/x%E9%A1%B5%E4%BB%A3%E7%A0%81/" style="font-size: 15px;">x页代码</a> <a href="/leeblog/tags/wechat/" style="font-size: 15px;">wechat</a> <a href="/leeblog/tags/%E5%BC%80%E6%BA%90/" style="font-size: 15px;">开源</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/leeblog/2022/04/15/cl1zzx40b0000rat21ma25rpo/">test</a></li><li class="post-list-item"><a class="post-list-link" href="/leeblog/2020/10/10/ckg3ngllb0000dwt2ayu4bt3u/">优秀开源项目之Shift-etl,从此告别无意义加班</a></li><li class="post-list-item"><a class="post-list-link" href="/leeblog/2020/09/13/ckfzdnaum0000n3t26ff5h968/">idea插件git commit template的使用与changeLog的生成</a></li><li class="post-list-item"><a class="post-list-link" href="/leeblog/2020/09/10/ckfzdnauq0002n3t29gn41hvq/">GIT Flow流程管理规范</a></li><li class="post-list-item"><a class="post-list-link" href="/leeblog/2020/09/08/ckfzdnauu0006n3t2eq4dhet6/">Markdown语法与Pandoc转换</a></li><li class="post-list-item"><a class="post-list-link" href="/leeblog/2020/09/05/ckfzdnauu0007n3t24u67dokk/">Maven插件之git-commit-id</a></li><li class="post-list-item"><a class="post-list-link" href="/leeblog/2020/08/16/ckfzdnauz000gn3t2h5hnd8k8/">Java三页代码之——实现Mysql透明加解密</a></li><li class="post-list-item"><a class="post-list-link" href="/leeblog/2020/07/10/ckfzdnauw000an3t281tq82ex/">Java一页代码之——实现微信自动智能回复</a></li><li class="post-list-item"><a class="post-list-link" href="/leeblog/2019/09/01/ckfzdnav1000nn3t21aa8gak8/">寻三儿启事</a></li><li class="post-list-item"><a class="post-list-link" href="/leeblog/2019/04/06/ckfzdnauw000cn3t2h84233wz/">再见仓老师</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="https://solo8world.github.io/leeblog/" title="暂无" target="_blank">暂无</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2022 <a href="/leeblog/." rel="nofollow">Lee Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/leeblog/js/totop.js?v=1.0.0" async></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/leeblog/js/fancybox.js?v=1.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.css"><link rel="stylesheet" type="text/css" href="/leeblog/css/search.css?v=1.0.0"><script type="text/javascript" src="/leeblog/js/search.js?v=1.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+  search_path = 'search.xml';
+}
+var path = '/leeblog/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/leeblog/js/copycode.js?v=1.0.0" successtext="复制成功!"></script><link rel="stylesheet" type="text/css" href="/leeblog/css/copycode.css?v=1.0.0"><script type="text/javascript" src="/leeblog/js/codeblock-resizer.js?v=1.0.0"></script><script type="text/javascript" src="/leeblog/js/smartresize.js?v=1.0.0"></script></div></body></html>
