@@ -6,7 +6,7 @@
   <link href="leeblog.icu/atom.xml" rel="self"/>
   
   <link href="leeblog.icu/"/>
-  <updated>2022-04-28T02:20:00.268Z</updated>
+  <updated>2022-04-28T03:14:00.143Z</updated>
   <id>leeblog.icu/</id>
   
   <author>
@@ -17,16 +17,16 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>jetbrains旗下所有产品激活方法</title>
+    <title>Jetbrains旗下所有产品激活方法</title>
     <link href="leeblog.icu/2022/04/26/cl2idp72w000eu9t264k3fymo/"/>
     <id>leeblog.icu/2022/04/26/cl2idp72w000eu9t264k3fymo/</id>
     <published>2022-04-26T08:59:33.000Z</published>
-    <updated>2022-04-28T02:20:00.268Z</updated>
+    <updated>2022-04-28T03:14:00.143Z</updated>
     
-    <content type="html"><![CDATA[<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><ul><li><p>下载相关产品（推荐下载 <a href="https://www.jetbrains.com/toolbox-app/">ToolBox</a> 进行相关产品安装，便于后期软件及软件管理升级）</p> <img src="https://s1.ax1x.com/2022/04/27/LLSuTS.png" width="50%"> </li><li><p>访问<a href="https://jetbra.in/s">https://jetbra.in/s</a> 下载 <a href="https://jetbra.in/files/ja-netfilter-all-7d68b53deb1b1a16f8e95ecf8f3f98805d18368d.zip">ja-netfilter-all.zip</a></p></li><li><p>解压ja-netfilter-all.zip</p></li></ul><h2 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h2><blockquote><p>两种进行路径。</p></blockquote><h4 id="第一种："><a href="#第一种：" class="headerlink" title="第一种："></a>第一种：</h4><ol><li><p>通过注册帐号并登陆进入试用期，打开idea。或在<a href="https://www.ajihuo.com/idea/4222.html">https://www.ajihuo.com/idea/4222.html</a> 该站获取激活码，打开idea。</p></li><li><p>打开idea菜单<code>Help</code>-&gt;<code>Edite Custom VM Options...</code>,对idea启动脚本进行编辑，在文件下面添加一行:</p><p><code>-javaagent:/你/的/路/径/ja-netfilter-all/ja-netfilter.jar</code></p><p>如图：</p><img src="https://s1.ax1x.com/2022/04/27/LLCcmq.png" width="100%">  </li></ol><ol start="3"><li>重启idea，在 <a href="https://jetbra.in/s">https://jetbra.in/s</a> 复制对应的激活码，输入注册码，激活成功。</li></ol><hr><h4 id="第二种-该方法不一定能成功"><a href="#第二种-该方法不一定能成功" class="headerlink" title="第二种 该方法不一定能成功"></a>第二种 <code>该方法不一定能成功</code></h4><ol><li>进入文件夹ja-netfilter-all/scripts/，执行系统对应的脚本(windows执行.vbs后缀的,mac及linux执行.sh后缀的)。</li><li>启动idea,在<a href="https://jetbra.in/s">https://jetbra.in/s</a>复制对应的激活码，输入注册码，激活成功。</li></ol><h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><ul><li>编辑<code>~/ja-netfilter-all/config/mymap.conf</code>可随意修改到期时间及licenseeName。</li><li>该软件适用所有插件</li></ul><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2022/04/26/cl2idp72w000eu9t264k3fymo/">leeblog.icu/2022/04/26/cl2idp72w000eu9t264k3fymo/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
+    <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote><p>在网络注册码乱象丛生的今天，我们再难以像以前那样找到稳定可用的方法了。</p></blockquote><blockquote><p>随着 <a href="https://zhile.io/">知了大佬</a> 的出现，我们终于看到了白嫖的曙光————无限试用插件<a href="https://zhile.io/2020/11/18/jetbrains-eval-reset-deprecated.html"><code>IDE Eval Reset</code></a>。</p></blockquote><blockquote><p>然而，Jetbrains道高一尺，随着idea<code>2021.2.3</code>版本的推出，我们含泪挥别<a href="https://zhile.io/2020/11/18/jetbrains-eval-reset-deprecated.html"><code>IDE Eval Reset</code></a></p></blockquote><blockquote><p>可是，知了大佬技艺日渐精进，魔高一丈，最终祭出大杀器————<a href="https://zhile.io/2021/11/29/ja-netfilter-javaagent-lib.html">ja-netfilter</a> !!!</p></blockquote><blockquote><p>接下来，本文将带大家一起见证它的牛逼。。。。 </p></blockquote><blockquote><p>最后，本文只做个人学习研究之用，不得用于商业用途！<br>建议<a href="https://www.jetbrains.com/idea/buy/#commercial">点击链接</a> 购买正版</p></blockquote><h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><ul><li><p>官方下载相关产品（推荐下载 <a href="https://www.jetbrains.com/toolbox-app/">ToolBox</a> 进行相关产品安装，便于后期软件及软件管理升级）</p> <img src="https://s1.ax1x.com/2022/04/27/LLSuTS.png" width="50%"> </li><li><p>访问<a href="https://jetbra.in/s">https://jetbra.in/s</a> 下载 <a href="https://jetbra.in/files/ja-netfilter-all-7d68b53deb1b1a16f8e95ecf8f3f98805d18368d.zip">ja-netfilter-all.zip</a></p></li><li><p>解压ja-netfilter-all.zip</p></li></ul><h2 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h2><blockquote><p>两种进行路径。</p></blockquote><h4 id="第一种："><a href="#第一种：" class="headerlink" title="第一种："></a>第一种：</h4><ol><li><p>通过注册帐号并登陆进入试用期，打开idea。或在<a href="https://www.ajihuo.com/idea/4222.html">https://www.ajihuo.com/idea/4222.html</a> 该站获取激活码，打开idea。</p></li><li><p>打开idea菜单<code>Help</code>-&gt;<code>Edite Custom VM Options...</code>,对idea启动脚本进行编辑，在文件下面添加一行:</p><p><code>-javaagent:/你/的/路/径/ja-netfilter-all/ja-netfilter.jar</code></p><p>如图：</p><img src="https://s1.ax1x.com/2022/04/27/LLCcmq.png" width="100%">  </li></ol><ol start="3"><li>重启idea，在 <a href="https://jetbra.in/s">https://jetbra.in/s</a> 复制对应的激活码，输入注册码，激活成功。</li></ol><hr><h4 id="第二种-该方法不一定能成功"><a href="#第二种-该方法不一定能成功" class="headerlink" title="第二种 该方法不一定能成功"></a>第二种 <code>该方法不一定能成功</code></h4><ol><li>进入文件夹ja-netfilter-all/scripts/，执行系统对应的脚本(windows执行.vbs后缀的,mac及linux执行.sh后缀的)。</li><li>启动idea,在<a href="https://jetbra.in/s">https://jetbra.in/s</a>复制对应的激活码，输入注册码，激活成功。</li></ol><h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><ul><li>编辑<code>~/ja-netfilter-all/config/mymap.conf</code>可随意修改到期时间及licenseeName。</li><li>该软件适用所有插件</li></ul><h2 id="致谢"><a href="#致谢" class="headerlink" title="致谢"></a>致谢</h2><ul><li>再次致谢知了<a href="https://zhile.io/">https://zhile.io/</a></li></ul><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2022/04/26/cl2idp72w000eu9t264k3fymo/">leeblog.icu/2022/04/26/cl2idp72w000eu9t264k3fymo/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
     
     
-    <summary type="html">jetbrains旗下所有产品最新版激活方法，包括idea某些收费插件。</summary>
+    <summary type="html">在网络注册码乱象丛生的今天，我们再难以像以前那样找到稳定可用的方法了</summary>
     
     
     
