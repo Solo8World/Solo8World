@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="个人不完全技术博客"><title>idea插件git commit template的使用与changeLog的生成 | Lee Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=1.0.0"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/normalize.css/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/pure-min.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/clipboard/dist/clipboard.min.js"></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.css"><div class="darkmode-toggle">🌓</div><script>var prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)');
+var toggle = document.querySelector('.darkmode-toggle');
+var html = document.querySelector('html');
+
+html.dataset.dark = localStorage.dark || prefersDarkMode.matches;
+
+toggle.addEventListener('click', () => {
+localStorage.dark = !(html.dataset.dark == 'true');
+html.dataset.dark = localStorage.dark;
+});</script><meta name="generator" content="Hexo 5.1.1"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">idea插件git commit template的使用与changeLog的生成</h1><a id="logo" href="/.">Lee Blog</a><p class="description">Less is more.  enmm... except hair</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">idea插件git commit template的使用与changeLog的生成</h1><div class="post-meta">2020-09-13<span> | </span><span class="category"><a href="/categories/%E6%8A%80%E6%9C%AF-%E5%B7%A5%E5%85%B7/">技术,工具</a></span><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> 阅读</span></span></div><div class="clear"><div class="toc-article" id="toc"><div class="toc-title">文章目录</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Git-Commit-Template%E6%8F%92%E4%BB%B6%E7%9A%84%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8"><span class="toc-number">2.</span> <span class="toc-text">Git Commit Template插件的安装与使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%A9%E7%94%A8conventional-changelog%E7%94%9F%E6%88%90Change-log"><span class="toc-number">3.</span> <span class="toc-text">利用conventional-changelog生成Change log</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B4%E5%A4%9A%E5%8F%AF%E5%8F%82%E8%80%83"><span class="toc-number">4.</span> <span class="toc-text">更多可参考:</span></a></li></ol></div></div><div class="post-content"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>git commit template 该插件是为了规范git提交注释的。一个项目一个团队的git log一定要整整齐齐的。<br>统一的提交注释规范，除了自己赏心悦目获得极大的舒适感以外，还能为后续的code review、版本升级change log文档的生成，提供极大的便利。  </p>
+<ul>
+<li><strong><a target="_blank" rel="noopener" href="https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-guidelines">Angular规范</a> 提交格式如下：</strong></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">type</span>&gt;</span>(<span class="tag">&lt;<span class="name">scope</span>&gt;</span>): <span class="tag">&lt;<span class="name">subject</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">BLANK</span> <span class="attr">LINE</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">BLANK</span> <span class="attr">LINE</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">footer</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>含义：</strong></p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">提交类型(改动涉及范围): 简要描述</span><br><span class="line"><span class="tag">&lt;<span class="name">空行</span>&gt;</span></span><br><span class="line">详细描述(可换多行进行描述)</span><br><span class="line"><span class="tag">&lt;<span class="name">空行</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">页脚</span>&gt;</span>（BREAKING CHANGE重大改动描述；Close Issue）</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>提交类型：</strong></p>
+<ul>
+<li>feat：新功能开发</li>
+<li>fix：bug修复</li>
+<li>docs：项目文档改动</li>
+<li>style： 代码格式（不影响代码运行的变动,空格,格式化,等等）</li>
+<li>refactor：重构（理论上不影响功能的代码重构）</li>
+<li>perf: 性能优化</li>
+<li>test：增加或者修改测试</li>
+<li>build: 影响构建系统或外部依赖项的更改(maven)</li>
+<li>ci: 对CI配置文件和脚本的更改</li>
+<li>chore：对非 src 和 test 目录的修改</li>
+<li>revert: 还原上一次提交</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p><strong>以feat提交为例，commit message格式如下:</strong></p>
+<figure class="highlight"><table><tr><td class="code"><pre><span class="line"><span class="attribute">feat(系统管理)</span>: 新增用户密码设置规则检验  </span><br><span class="line"></span><br><span class="line">(1)验证密码设置由大小写字母数字特殊符号任意三种组合</span><br><span class="line">(2)验证密码设置长度8-12位</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>注：</p>
+<ul>
+<li>提交格式中<code>type</code> 、<code>subject</code>为必填，<code>scope</code>、<code>body</code> 、<code>footer</code>为选填 </li>
+<li>revert提交时以revert:开头, 后面跟着被撤销Commit的Header。<br>Body部分的格式是固定的，必须写成This reverts commit <hash>,<br>其中的hash是被撤销 commit 的 SHA 标识符.</li>
+</ul>
+</li>
+</ul>
+<h2 id="Git-Commit-Template插件的安装与使用"><a href="#Git-Commit-Template插件的安装与使用" class="headerlink" title="Git Commit Template插件的安装与使用"></a><code>Git Commit Template</code>插件的安装与使用</h2><ul>
+<li><strong>安装</strong>  </li>
+</ul>
+<p>idea中直接<code>File</code>-&gt;<code>Setting</code>-&gt;<code>Plugins</code>搜索安装即可<br><img src="https://s1.ax1x.com/2020/09/16/wcTUMQ.png" width="100%"></p>
+<ul>
+<li><strong>使用</strong>  </li>
+</ul>
+<ol>
+<li><p>安装并重启idea后，操作提交时会有此按钮  </p>
+<img src="https://s1.ax1x.com/2020/09/16/wcT2M4.png" width="100%">
+</li>
+<li><p>点击弹出  </p>
+<img src="https://s1.ax1x.com/2020/09/16/wcTHzD.png" width="100%">
+</li>
+<li><p>按需填写并确认后生成以下格式：  </p>
+<img src="https://s1.ax1x.com/2020/09/16/wcTjeA.png" width="100%">
+
+
+</li>
+</ol>
+<h2 id="利用conventional-changelog生成Change-log"><a href="#利用conventional-changelog生成Change-log" class="headerlink" title="利用conventional-changelog生成Change log"></a>利用conventional-changelog生成Change log</h2><ul>
+<li><strong>安装</strong><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">npm install -g conventional-changelog-cli</span><br></pre></td></tr></table></figure></li>
+<li><strong>生成</strong><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conventional-changelog -p angular -i CHANGELOG.md -s</span><br></pre></td></tr></table></figure></li>
+<li><strong>生成的md效果如下</strong>  </li>
+</ul>
+  <img src="https://s1.ax1x.com/2020/09/16/wc7NY6.png" width="100%">
+
+
+
+<h2 id="更多可参考"><a href="#更多可参考" class="headerlink" title="更多可参考:"></a>更多可参考:</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/daysme/p/7722474.html">Git 提交的正确姿势：Commit message 编写指南</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/itguangit/article/details/99590995#t2">IDEA 中 Git Commit message 编写</a><br><a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2016/01/commit_message_change_log.html">Commit message 和 Change log 编写指南</a>  </p>
+<p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2020/09/13/cl2idh5vf0001zqt26vz41t6g/">leeblog.icu/2020/09/13/cl2idh5vf0001zqt26vz41t6g/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>
+</div><div id="donate"><link rel="stylesheet" type="text/css" href="/css/donate.css?v=1.0.0"><script type="text/javascript" src="/js/donate.js?v=1.0.0" successtext="复制成功!"></script><a class="pos-f tr3" id="github" href="https://github.com/Kaiyuan/donate-page" target="_blank" title="Github"></a><div id="DonateText">Donate</div><ul class="list pos-f" id="donateBox"><li id="AliPay" qr="https://s1.ax1x.com/2020/10/07/0ahUHK.jpg"></li><li id="WeChat" qr="https://s1.ax1x.com/2020/10/07/0ahUHK.jpg"></li></ul><div class="pos-f left-100" id="QRBox"><div id="MainBox"></div></div></div><script type="text/javascript" src="/js/share.js?v=1.0.0" async></script><a class="article-share-link" data-url="leeblog.icu/2020/09/13/cl2idh5vf0001zqt26vz41t6g/" data-id="cl2idh5vf0001zqt26vz41t6g" data-qrcode="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACJUlEQVR42u3aS27bQBAFQN//0gqQVTam3usZB9ZMcSWQssjiot2/r6/4eP09/v2cn/nuanKvzQcGBsbHMl6PR8Joqc93af8KAwPjHkYeZGek5xf3zIiCMgYGBkb5WMmD5ucxMDAw2oCb14/JNzEwMDByRlteJrycmp/fUItjYGB8IGM2GPg/n398voGBgfHrGa/y+Lngu/RUGBgYRzOe22ez9C559DagR3fBwMA4mpEPI/OfTkj51SJZxMDAOJTRFo350ljeVpvVqhgYGHcy2iHiSuk7C8rf/gIGBsYFjOSWKzfOU8x2nImBgXEPIw++7ZAgac8lV98kiBgYGEczZq23PGXcUKAmARcDA+NoRtLin61wtWG3fQYMDIwbGHlIzVPA5HweaiMwBgbGNYy8UMzbarPhQb0UgoGBcTRjZQ1rNoxsVzSKYQMGBsahjL2LFLNULylZ37TbMDAwrmG0rfzZUkU7BK3bbRgYGMcxVlpm+StYb6hF5S4GBsahjL3JX/4i2vbcmwIbAwPjAsaun85h7WLZmxeNgYFxNGNlMNAumOb44aorBgbGoYxhaAuC6awN1yaUGBgYNzDaYNo+4mxRI0klMTAwbmPM2m27WmztIGHYO8TAwDiCkYTF9Yi+q2Cu/ydgYGBcw2jXI/J0cDYYwMDAwJilg3mqtxK+o/kGBgbGcYykiG2TxdnVtsDGwMC4gdFWiLvYszp023wDAwPjMxh/AGGu5lQX13olAAAAAElFTkSuQmCC">分享</a><div class="tags"><a href="/tags/GIT"><i class="fa fa-tag">GIT</i></a><a href="/tags/开发规范"><i class="fa fa-tag">开发规范</i></a><a href="/tags/工具"><i class="fa fa-tag">工具</i></a></div><div class="post-nav"><a class="pre" href="/2020/10/10/cl2idh5vp000hzqt238kqa6tq/">优秀开源项目之Shift-etl,从此告别无意义加班</a><a class="next" href="/2020/09/10/cl2idh5vh0002zqt2c2b8he99/">GIT Flow流程管理规范</a></div><div id="lv-container" data-id="city" data-uid="MTAyMC81MTcwMC8yODE4MQ=="><script>(function(d, s) {
+  var j, e = d.getElementsByTagName(s)[0];
+  if (typeof LivereTower === 'function') { return; }
+  j = d.createElement(s);
+  j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+  j.async = true;
+  e.parentNode.insertBefore(j, e);
+})(document, 'script');
+</script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/%E4%BB%A3%E7%A0%81/">代码</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF-%E5%B7%A5%E5%85%B7/">技术,工具</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E9%9A%8F%E7%AC%94/">随笔</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/GIT/" style="font-size: 15px;">GIT</a> <a href="/tags/%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83/" style="font-size: 15px;">开发规范</a> <a href="/tags/%E5%B7%A5%E5%85%B7/" style="font-size: 15px;">工具</a> <a href="/tags/%E9%9A%8F%E7%AC%94/" style="font-size: 15px;">随笔</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/x%E9%A1%B5%E4%BB%A3%E7%A0%81/" style="font-size: 15px;">x页代码</a> <a href="/tags/wechat/" style="font-size: 15px;">wechat</a> <a href="/tags/%E4%BB%A3%E7%A0%81/" style="font-size: 15px;">代码</a> <a href="/tags/%E6%96%87%E6%A1%A3/" style="font-size: 15px;">文档</a> <a href="/tags/idea/" style="font-size: 15px;">idea</a> <a href="/tags/%E5%BC%80%E6%BA%90/" style="font-size: 15px;">开源</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2022/04/26/cl2idh5vo000fzqt227m7bcyb/">jetbrains旗下所有产品激活方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/10/cl2idh5vp000hzqt238kqa6tq/">优秀开源项目之Shift-etl,从此告别无意义加班</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/cl2idh5vf0001zqt26vz41t6g/">idea插件git commit template的使用与changeLog的生成</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/10/cl2idh5vh0002zqt2c2b8he99/">GIT Flow流程管理规范</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/08/cl2idh5vm000azqt20cmu7bnb/">Markdown语法与Pandoc转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/05/cl2idh5vn000bzqt2ecv861mv/">Maven插件之git-commit-id</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/08/16/cl2idh5vl0007zqt2dk438vm0/">Java三页代码之——实现Mysql透明加解密</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/10/cl2idh5vk0006zqt2aguz5sxy/">Java一页代码之——实现微信自动智能回复</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/01/cl2idh5vs000ozqt2b3t01kti/">寻三儿启事</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/06/cl2idh5vr000lzqt2fjvsbio2/">再见仓老师</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="https://solo8world.github.io/leeblog/" title="暂无" target="_blank">暂无</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2022 <a href="/." rel="nofollow">Lee Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=1.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.css"><link rel="stylesheet" type="text/css" href="/css/search.css?v=1.0.0"><script type="text/javascript" src="/js/search.js?v=1.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+  search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/copycode.js?v=1.0.0" successtext="复制成功!"></script><link rel="stylesheet" type="text/css" href="/css/copycode.css?v=1.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=1.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=1.0.0"></script></div></body></html>
