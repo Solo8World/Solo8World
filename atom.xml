@@ -6,7 +6,7 @@
   <link href="leeblog.icu/atom.xml" rel="self"/>
   
   <link href="leeblog.icu/"/>
-  <updated>2022-04-28T03:14:00.143Z</updated>
+  <updated>2022-05-11T10:31:26.530Z</updated>
   <id>leeblog.icu/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>IDEA常用插件及简介</title>
+    <link href="leeblog.icu/2022/04/29/cl2kb1xcz0000het2bw8701d2/"/>
+    <id>leeblog.icu/2022/04/29/cl2kb1xcz0000het2bw8701d2/</id>
+    <published>2022-04-29T11:25:48.000Z</published>
+    <updated>2022-05-11T10:31:26.530Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="NO-1"><a href="#NO-1" class="headerlink" title="NO.1"></a>NO.1</h2><p><strong>Translation</strong><code>翻译插件</code>   </p><p>故名思义，Translation是一款翻译插件。支持<code>自定义翻译引擎</code>、<code>划词翻译</code>，<code>自动翻译</code>。</p><p>选中文字（中文或英文）：<br><code>ctrl</code>+<code>shift</code>+ <code>y</code> 翻译<br><code>ctrl</code>+<code>shift</code>+ <code>x</code> 翻译并选中替换</p><p>同时，可以在插件配置中开启文档自动翻译。</p><p>使用场景，翻译源码注释、翻译log错误信息、起变量名，生产力MAX。</p><h2 id="NO-2"><a href="#NO-2" class="headerlink" title="NO.2"></a>NO.2</h2><p><strong>Alibaba Java Coding Guidelines</strong> <code>代码质量扫描</code>   </p><p>代码质量扫描，根据阿里代码规约标注不符合规范的代码。</p><h2 id="NO-3"><a href="#NO-3" class="headerlink" title="NO.3"></a>NO.3</h2><p><strong>MybatisX</strong> <code>Mybatis框架辅助插件</code>   </p><p>Mapper接口和XML实现可以来回跳转，也可以直接生成对应xml标签，mapper和xml支持自动提示，如jpa(参考MybatisCodeHelperPro)。</p><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2022/04/29/cl2kb1xcz0000het2bw8701d2/">leeblog.icu/2022/04/29/cl2kb1xcz0000het2bw8701d2/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
+    
+    
+    <summary type="html">工具即生产力！插件即生产力！</summary>
+    
+    
+    
+    <category term="工具" scheme="leeblog.icu/categories/%E5%B7%A5%E5%85%B7/"/>
+    
+    
+    <category term="工具" scheme="leeblog.icu/tags/%E5%B7%A5%E5%85%B7/"/>
+    
+    <category term="插件" scheme="leeblog.icu/tags/%E6%8F%92%E4%BB%B6/"/>
+    
+  </entry>
   
   <entry>
     <title>Jetbrains旗下所有产品激活方法</title>
@@ -71,7 +94,7 @@
     <link href="leeblog.icu/2020/09/13/cl2idp72n0001u9t2hzu44xk8/"/>
     <id>leeblog.icu/2020/09/13/cl2idp72n0001u9t2hzu44xk8/</id>
     <published>2020-09-13T11:00:34.000Z</published>
-    <updated>2022-04-28T02:18:16.271Z</updated>
+    <updated>2022-04-29T01:39:41.707Z</updated>
     
     <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>git commit template 该插件是为了规范git提交注释的。一个项目一个团队的git log一定要整整齐齐的。<br>统一的提交注释规范，除了自己赏心悦目获得极大的舒适感以外，还能为后续的code review、版本升级change log文档的生成，提供极大的便利。  </p><ul><li><strong><a href="https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-guidelines">Angular规范</a> 提交格式如下：</strong></li></ul><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">type</span>&gt;</span>(<span class="tag">&lt;<span class="name">scope</span>&gt;</span>): <span class="tag">&lt;<span class="name">subject</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">BLANK</span> <span class="attr">LINE</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">BLANK</span> <span class="attr">LINE</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">footer</span>&gt;</span></span><br></pre></td></tr></table></figure><ul><li><p><strong>含义：</strong></p><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">提交类型(改动涉及范围): 简要描述</span><br><span class="line"><span class="tag">&lt;<span class="name">空行</span>&gt;</span></span><br><span class="line">详细描述(可换多行进行描述)</span><br><span class="line"><span class="tag">&lt;<span class="name">空行</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">页脚</span>&gt;</span>（BREAKING CHANGE重大改动描述；Close Issue）</span><br></pre></td></tr></table></figure></li><li><p><strong>提交类型：</strong></p><ul><li>feat：新功能开发</li><li>fix：bug修复</li><li>docs：项目文档改动</li><li>style： 代码格式（不影响代码运行的变动,空格,格式化,等等）</li><li>refactor：重构（理论上不影响功能的代码重构）</li><li>perf: 性能优化</li><li>test：增加或者修改测试</li><li>build: 影响构建系统或外部依赖项的更改(maven)</li><li>ci: 对CI配置文件和脚本的更改</li><li>chore：对非 src 和 test 目录的修改</li><li>revert: 还原上一次提交</li></ul></li></ul><ul><li><p><strong>以feat提交为例，commit message格式如下:</strong></p><figure class="highlight"><table><tr><td class="code"><pre><span class="line"><span class="attribute">feat(系统管理)</span>: 新增用户密码设置规则检验  </span><br><span class="line"></span><br><span class="line">(1)验证密码设置由大小写字母数字特殊符号任意三种组合</span><br><span class="line">(2)验证密码设置长度8-12位</span><br></pre></td></tr></table></figure></li><li><p>注：</p><ul><li>提交格式中<code>type</code> 、<code>subject</code>为必填，<code>scope</code>、<code>body</code> 、<code>footer</code>为选填 </li><li>revert提交时以revert:开头, 后面跟着被撤销Commit的Header。<br>Body部分的格式是固定的，必须写成This reverts commit <hash>,<br>其中的hash是被撤销 commit 的 SHA 标识符.</li></ul></li></ul><h2 id="Git-Commit-Template插件的安装与使用"><a href="#Git-Commit-Template插件的安装与使用" class="headerlink" title="Git Commit Template插件的安装与使用"></a><code>Git Commit Template</code>插件的安装与使用</h2><ul><li><strong>安装</strong>  </li></ul><p>idea中直接<code>File</code>-&gt;<code>Setting</code>-&gt;<code>Plugins</code>搜索安装即可<br><img src="https://s1.ax1x.com/2020/09/16/wcTUMQ.png" width="100%"></p><ul><li><strong>使用</strong>  </li></ul><ol><li><p>安装并重启idea后，操作提交时会有此按钮  </p><img src="https://s1.ax1x.com/2020/09/16/wcT2M4.png" width="100%"></li><li><p>点击弹出  </p><img src="https://s1.ax1x.com/2020/09/16/wcTHzD.png" width="100%"></li><li><p>按需填写并确认后生成以下格式：  </p><img src="https://s1.ax1x.com/2020/09/16/wcTjeA.png" width="100%"></li></ol><h2 id="利用conventional-changelog生成Change-log"><a href="#利用conventional-changelog生成Change-log" class="headerlink" title="利用conventional-changelog生成Change log"></a>利用conventional-changelog生成Change log</h2><ul><li><strong>安装</strong><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">npm install -g conventional-changelog-cli</span><br></pre></td></tr></table></figure></li><li><strong>生成</strong><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conventional-changelog -p angular -i CHANGELOG.md -s</span><br></pre></td></tr></table></figure></li><li><strong>生成的md效果如下</strong>  </li></ul>  <img src="https://s1.ax1x.com/2020/09/16/wc7NY6.png" width="100%"><h2 id="更多可参考"><a href="#更多可参考" class="headerlink" title="更多可参考:"></a>更多可参考:</h2><p><a href="https://www.cnblogs.com/daysme/p/7722474.html">Git 提交的正确姿势：Commit message 编写指南</a><br><a href="https://blog.csdn.net/itguangit/article/details/99590995#t2">IDEA 中 Git Commit message 编写</a><br><a href="http://www.ruanyifeng.com/blog/2016/01/commit_message_change_log.html">Commit message 和 Change log 编写指南</a>  </p><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2020/09/13/cl2idp72n0001u9t2hzu44xk8/">leeblog.icu/2020/09/13/cl2idp72n0001u9t2hzu44xk8/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
     
