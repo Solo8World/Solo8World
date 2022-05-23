@@ -111,10 +111,10 @@
   cursor: pointer; }
 
 #donate #donateBox #AliPay {
-  background-image: url(source/img/alipay.svg); }
+  background-image: url(img/alipay.svg); }
 
 #donate #donateBox #WeChat {
-  background-image: url(source/img/wechat.svg); }
+  background-image: url(img/wechat.svg); }
 
 #donate #QRBox {
   top: 0;
