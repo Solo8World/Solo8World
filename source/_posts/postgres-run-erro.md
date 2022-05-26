@@ -23,7 +23,7 @@ description: 常用的sql语句往往只支持单一的数据范围统计，而�
 2022-05-24 11:39:48.898 CST [1] LOG:  database system is shut down
 ```
 ## 前情提要
-测试环境postgre数据库是以docker容器部署的单节点服务，机器在本地机房里。
+测试环境postgreSQL数据库是以docker容器部署的单节点服务，机器在本地机房里。
 
 昨日凌晨机房又一次突然断电，断电本是常事，奈何这次机房服务器再次恢复后pg的容器未能成功重启。
 
@@ -33,24 +33,26 @@ description: 常用的sql语句往往只支持单一的数据范围统计，而�
 
 ## 问题解决  
 * `docker ps` 可以看到，pg的容器还在挣扎着不断启动、失败、启动、失败。
-`docker logs -f --tail200 pg` 查看容器启动日志，发现情况还不算严重。应是断电时pg正在进行事务操作，突然断电导致事务日志文件损坏，pg再次启动时读取失败。此时应该只需进入pg容器里重置事务日志即可。
+`docker logs -f --tail 200 pg` 查看容器启动日志，发现情况还不算严重。应是断电时pg正在进行事务操作，突然断电导致事务日志文件损坏，pg再次启动时读取失败。此时应该只需进入pg容器里重置事务日志即可。
 然而是容器部署的，容器始终无法启动成功，根本没有下手执行重置的时机。
 
  <img src="https://s1.ax1x.com/2022/05/26/XEIbo6.png" width="100%">  
 
 * 这机器的服务部署并非出自我手，为了搞清敌情，`docker inspect pg`，查看容器详情。
-通过inspect可以看到，容器的数据存储位置映射了外部的文件位置。
-<img src="https://i.imgur.com/yFe8s81.png" width="100%">
+通过inspect可以看到，容器的数据存储位置映射了外部的文件位置，而且在环境变量中指定了数据文件存储位置。
+<img src="https://s1.ax1x.com/2022/05/26/XVdvX4.png" width="100%">
 
-* 当即立断，决定启动一个临时容器映射同样的文件存储位置来执行日志重置。
-先是一个`docker update --restart=no pg`，叫停当前容器的不断重启行为，防止启动临时容器后两个容器同时读写日志文件造成场面进一步的混乱。
-然后基于原来容器的镜像，以临时模式启动一个新容器，并进入容器bash端，切换postgres用户（默认必须以postgres执行），找到rest工具位置全路径，
-ctrl c ，ctrl v，回车，
-<img src="https://i.imgur.com/M3QNivZ.png" width="100%">
-<img src="https://i.imgur.com/cgF1cy2.png" width="100%">
+* 当鸡立断，决定启动一个临时容器映射同样的文件存储位置来执行日志重置。
+   * 先是一个`docker update --restart=no pg`，叫停当前容器的不断重启行为，防止启动临时容器后两个容器同时读写日志文件造成场面进一步的混乱。
+   *  然后基于原来容器的镜像，以临时模式启动一个新容器，并进入容器bash端，切换postgres用户（默认必须以postgres执行），找到rest工具位置全路径，
+       ctrl c ，ctrl v，回车，
+     <img src="https://s1.ax1x.com/2022/05/26/XVwPtx.png" width="100%">
+     <img src="https://s1.ax1x.com/2022/05/26/XVwA1O.png" width="100%">
 
 * 执行成功。退出当前容器，因为是临时的所以退出即运行终止。
-`docker start pg`  再次启动原来的容器，启动成功。
+  
+* `docker start pg`  再次启动原来的容器，启动成功。
+
 有惊无险，打完收工，没有备份，下次一定。
 
 
@@ -65,7 +67,7 @@ $docker inspect pg                     #查看容器配置详情
 $docker update --restart=no pg         #取消失败自动重启
 $docker run -it  -v   /opt/appdata/pgdata:/var/lib/postgresql/data  --env PGDATA=/var/lib/postgresql/data/pgdata  postgres:13   /bin/bash  ##启动临时容器并进入bash
 $su postgres                          #临时容器内:切换postgres用户
-$pg_resetwal -f /var/lib/postgresql/data/pgdata  #临时容器内: 执行事务日志重置
+$pg_resetwal -f /var/lib/postgresql/data/pgdata  #临时容器内: 利用pg工具，执行事务日志重置
 $exit                                 #临时容器内:退出容器
 $docker start pg                      #启动pg容器
 ```
