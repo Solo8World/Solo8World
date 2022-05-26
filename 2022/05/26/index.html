@@ -1,0 +1,418 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="个人不完全技术博客"><title>PG窗口函数的应用实践 | Lee Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=1.0.0"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/normalize/latest/normalize.min.css"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/pure/latest/pure-min.min.css"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/pure/latest/grids-responsive-min.min.css"><link rel="stylesheet" href="//lib.baomitu.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//lib.baomitu.com/jquery/latest/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script type="text/javascript" src="//lib.baomitu.com/clipboard.js/latest/clipboard.min.js"></script><script type="text/javascript" src="//lib.baomitu.com/toastr.js/latest/toastr.min.js"></script><link rel="stylesheet" href="//lib.baomitu.com/toastr.js/latest/toastr.min.css"><div class="darkmode-toggle">🌓</div><script>var prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)');
+var toggle = document.querySelector('.darkmode-toggle');
+var html = document.querySelector('html');
+
+html.dataset.dark = localStorage.dark || prefersDarkMode.matches;
+
+toggle.addEventListener('click', () => {
+localStorage.dark = !(html.dataset.dark == 'true');
+html.dataset.dark = localStorage.dark;
+});</script><meta name="generator" content="Hexo 5.1.1"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">PG窗口函数的应用实践</h1><a id="logo" href="/.">Lee Blog</a><p class="description">Less is more.  enmm... except hair</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">PG窗口函数的应用实践</h1><div class="post-meta">2022-05-26<span> | </span><span class="category"><a href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> 阅读</span></span></div><div class="clear"><div class="toc-article" id="toc"><div class="toc-title">文章目录</div><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">简述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%92%E5%90%8D%E7%B1%BB"><span class="toc-number">2.</span> <span class="toc-text">排名类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%81%9A%E5%90%88%E7%B1%BB"><span class="toc-number">3.</span> <span class="toc-text">聚合类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E8%BF%90%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">其他运用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%99%84%E5%BD%95"><span class="toc-number">6.</span> <span class="toc-text">附录</span></a></li></ol></div></div><div class="post-content"><h3 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h3><p>窗口函数主要用于聚合计算，相当于我们的分组语句group by。<br>常用的sql语句往往只支持单一的数据范围统计，而窗口函数支持更加灵活更加多样的数据范围划定。<br>本质上，是否需要使用窗口函数，取决于你的需求场景是否涉及到同一种事物的不同数据范围的同时计算。</p>
+<h3 id="排名类"><a href="#排名类" class="headerlink" title="排名类"></a>排名类</h3><p>排名，普通的只涉及到单一数据范围的排名的话，我们只需要正常的排序就可以满足，当你需要同时计算每个单位在不同数据范围下的排名计算，就需要使用窗口函数，<br>比如各个店铺销售额在楼层中的排名、在所属业态中的排名、在整个商场中的排名。</p>
+<ul>
+<li><p>源表结构示意</p>
+<table>
+<thead>
+<tr>
+<th align="left">shop_code</th>
+<th align="left">shop_name</th>
+<th align="left">floor_code</th>
+<th align="left">order_date</th>
+<th align="left">order_amount</th>
+<th align="left">market_code</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">HT2021051200025</td>
+<td align="left">BSiEE本涩</td>
+<td align="left">L2</td>
+<td align="left">2022-05-20</td>
+<td align="left">6786</td>
+<td align="left">000035</td>
+</tr>
+<tr>
+<td align="left">HT2021051300007</td>
+<td align="left">ROOKIE</td>
+<td align="left">L3</td>
+<td align="left">2022-05-20</td>
+<td align="left">98887</td>
+<td align="left">000035</td>
+</tr>
+<tr>
+<td align="left">HT2021051300013</td>
+<td align="left">剪花娘子</td>
+<td align="left">L5</td>
+<td align="left">2022-05-20</td>
+<td align="left">4567</td>
+<td align="left">000035</td>
+</tr>
+<tr>
+<td align="left">HT2021051300014</td>
+<td align="left">阿香米线</td>
+<td align="left">L5</td>
+<td align="left">2022-05-20</td>
+<td align="left">5845.23</td>
+<td align="left">000035</td>
+</tr>
+<tr>
+<td align="left">HT2021051700025</td>
+<td align="left">森林鸟</td>
+<td align="left">L2</td>
+<td align="left">2022-05-20</td>
+<td align="left">37463</td>
+<td align="left">000035</td>
+</tr>
+<tr>
+<td align="left">……</td>
+<td align="left">……</td>
+<td align="left">……</td>
+<td align="left">……</td>
+<td align="left">……</td>
+<td align="left">……</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>分别统计每店铺每天的销售额 在所在楼层中的排名、全场中的排名.</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> sale.shop_code,</span><br><span class="line">       sale.shop_name ,</span><br><span class="line">       sale.order_date <span class="keyword">as</span> 销售日期 ,</span><br><span class="line">       sale.order_amount <span class="keyword">as</span> 销售额,</span><br><span class="line">       <span class="keyword">rank</span>() <span class="keyword">OVER</span> (<span class="keyword">PARTITION</span> <span class="keyword">BY</span> sale.market_code, sale.order_date <span class="keyword">ORDER</span> <span class="keyword">BY</span> sale.order_amount <span class="keyword">DESC</span>) <span class="keyword">AS</span> 全场范围排名,</span><br><span class="line">       <span class="keyword">rank</span>() <span class="keyword">OVER</span> (<span class="keyword">PARTITION</span> <span class="keyword">BY</span> sale.market_code, sale.floor_code, sale.order_date <span class="keyword">ORDER</span> <span class="keyword">BY</span> sale.order_amount <span class="keyword">DESC</span>) <span class="keyword">AS</span> 店铺在所在楼层中的排名</span><br><span class="line"><span class="keyword">FROM</span> sale_data sale</span><br></pre></td></tr></table></figure></li>
+<li><p>查询结果  (示例)</p>
+<table>
+<thead>
+<tr>
+<th align="left">shop_code</th>
+<th align="left">shop_name</th>
+<th align="left">floor_code</th>
+<th align="left">销售日期</th>
+<th align="left">销售额</th>
+<th align="left">全场范围排名</th>
+<th align="left">店铺在所在楼层中的排名</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">WHDYC(20)Z</td>
+<td align="left">汉黄山</td>
+<td align="left">L5</td>
+<td align="left">2022-05-20</td>
+<td align="left">53038</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">HT2021121300</td>
+<td align="left">老寺黄金</td>
+<td align="left">B1</td>
+<td align="left">2022-05-20</td>
+<td align="left">27799</td>
+<td align="left">2</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">HT2021052500</td>
+<td align="left">楚去菜</td>
+<td align="left">L4</td>
+<td align="left">2022-05-20</td>
+<td align="left">21433.41</td>
+<td align="left">3</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">HT2021121400</td>
+<td align="left">Cdddoo</td>
+<td align="left">L1</td>
+<td align="left">2022-05-20</td>
+<td align="left">20531</td>
+<td align="left">4</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">HT2021052600037</td>
+<td align="left">火瀑麻</td>
+<td align="left">L4</td>
+<td align="left">2022-05-20</td>
+<td align="left">17260</td>
+<td align="left">5</td>
+<td align="left">2</td>
+</tr>
+<tr>
+<td align="left">WHDYC(20)Z</td>
+<td align="left">晓南福</td>
+<td align="left">L4</td>
+<td align="left">2022-05-20</td>
+<td align="left">16358.25</td>
+<td align="left">6</td>
+<td align="left">3</td>
+</tr>
+<tr>
+<td align="left">HT2021080500</td>
+<td align="left">小米家</td>
+<td align="left">L1</td>
+<td align="left">2022-05-20</td>
+<td align="left">13678.03</td>
+<td align="left">7</td>
+<td align="left">2</td>
+</tr>
+<tr>
+<td align="left">……</td>
+<td align="left">……</td>
+<td align="left">……</td>
+<td align="left">……</td>
+<td align="left">……</td>
+<td align="left">……</td>
+<td align="left">……</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<h3 id="聚合类"><a href="#聚合类" class="headerlink" title="聚合类"></a>聚合类</h3><p>聚合类，或者说累加，包括sum、avg、max、count等聚合函数。<br>同样的，如果我们只涉及到一种数据范围的聚合计算，那么只需要正常的聚合语句就可以完成。<br>当你需要同时计算某个值在不同数据范围下的聚合计算，就需要使用窗口函数，比如同时计算某商场每日新增的会员数量，以及截止到当日累计的会员数量。</p>
+<ul>
+<li><p>源数据表结构示意,注册记录表</p>
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">name</th>
+<th align="left">register_date</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">115752</td>
+<td align="left">李某某</td>
+<td align="left">2022-04-16</td>
+</tr>
+<tr>
+<td align="left">110498</td>
+<td align="left">朱某某</td>
+<td align="left">2022-04-09</td>
+</tr>
+<tr>
+<td align="left">109282</td>
+<td align="left">熊某某</td>
+<td align="left">2022-04-03</td>
+</tr>
+<tr>
+<td align="left">109290</td>
+<td align="left">徐某某</td>
+<td align="left">2022-04-03</td>
+</tr>
+<tr>
+<td align="left">108456</td>
+<td align="left">周某某</td>
+<td align="left">2022-03-28</td>
+</tr>
+<tr>
+<td align="left">107925</td>
+<td align="left">殷某某</td>
+<td align="left">2022-03-24</td>
+</tr>
+<tr>
+<td align="left">107575</td>
+<td align="left">樱某某</td>
+<td align="left">2022-03-20</td>
+</tr>
+<tr>
+<td align="left">107595</td>
+<td align="left">万某某</td>
+<td align="left">2022-03-20</td>
+</tr>
+<tr>
+<td align="left">107597</td>
+<td align="left">郑某某</td>
+<td align="left">2022-03-20</td>
+</tr>
+<tr>
+<td align="left">……</td>
+<td align="left">……</td>
+<td align="left">……</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>统计每日新增会员数及截至当日会员总数</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span>  m.register_date,</span><br><span class="line">        <span class="keyword">count</span>(<span class="number">0</span>)                                                       <span class="keyword">AS</span> 当日新增会员数,</span><br><span class="line">        <span class="keyword">sum</span>(<span class="keyword">count</span>(<span class="number">0</span>)) <span class="keyword">OVER</span> (<span class="keyword">ORDER</span> <span class="keyword">BY</span> m.register_date)                  <span class="keyword">AS</span> 截止当日总会员数</span><br><span class="line"> <span class="keyword">FROM</span> bi_data_member m</span><br><span class="line"> <span class="keyword">group</span> <span class="keyword">by</span>  register_date</span><br><span class="line"> <span class="keyword">ORDER</span> <span class="keyword">BY</span> m.register_date <span class="keyword">DESC</span></span><br></pre></td></tr></table></figure></li>
+<li><p>查询结果  (示例)</p>
+<table>
+<thead>
+<tr>
+<th align="left">register_date</th>
+<th align="left">当日新增会员数</th>
+<th align="left">截止当日总会员数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">2022-05-26</td>
+<td align="left">2</td>
+<td align="left">120092</td>
+</tr>
+<tr>
+<td align="left">2022-05-25</td>
+<td align="left">7</td>
+<td align="left">120090</td>
+</tr>
+<tr>
+<td align="left">2022-05-07</td>
+<td align="left">62</td>
+<td align="left">120083</td>
+</tr>
+<tr>
+<td align="left">2022-05-06</td>
+<td align="left">98</td>
+<td align="left">120021</td>
+</tr>
+<tr>
+<td align="left">2022-05-05</td>
+<td align="left">76</td>
+<td align="left">119923</td>
+</tr>
+<tr>
+<td align="left">2022-05-04</td>
+<td align="left">270</td>
+<td align="left">119847</td>
+</tr>
+<tr>
+<td align="left">2022-05-03</td>
+<td align="left">273</td>
+<td align="left">119577</td>
+</tr>
+<tr>
+<td align="left">2022-05-02</td>
+<td align="left">289</td>
+<td align="left">119304</td>
+</tr>
+<tr>
+<td align="left">2022-05-01</td>
+<td align="left">308</td>
+<td align="left">119015</td>
+</tr>
+<tr>
+<td align="left">……</td>
+<td align="left">……</td>
+<td align="left">……</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>从窗口函数的结构上看, 它是这么一个结构组成:  <code>fun OVER (PARTITION BY...  ORDER BY...)</code>  </p>
+<ul>
+<li><code>fun</code>表示最终的计算操作函数,可以是窗口函数专用函数,也支持sum、max、avg等通用聚合函数.  </li>
+<li><code>OVER</code> 无实际意义.  </li>
+<li><code>PARTITION BY</code>标识计算的数据范围的划分,也就是分组.  </li>
+<li><code>ORDER BY</code> 这个函数就有意思了,通常概念中它起到排序的作用,比如我们第一个销售排名示例.但大部分情况下,比如我们的会员新统计的示例,他也起到了数据范围圈定的作用.在示例中它的作用是把合计的数据范围截止在当前的日期.</li>
+<li><code>PARTITION BY</code> 和<code>ORDER BY</code>,至少使用其中一个,否则窗口无效.</li>
+</ul>
+<h3 id="其他运用"><a href="#其他运用" class="headerlink" title="其他运用"></a>其他运用</h3><p>移动计算类,除了以上我们提到的示例外,窗口函数还支持移动计算的场景.<br>其实本质上还是数据范围的划定,移动计算的含义就是可以通过指定每一行的前后多少行来聚合计算.而不单单只是根据某些业务字段来分组计算.<br>这种类型我本人尚未在实际业务场景中用到过,所以本文不再赘述.</p>
+<h3 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h3><ul>
+<li><p>一些窗口函数</p>
+<table>
+<thead>
+<tr>
+<th align="left">函数名称</th>
+<th align="left">返回类型</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">row_number()</td>
+<td align="left">bigint</td>
+<td align="left">在其分区中的当前行号，从1开始计算</td>
+</tr>
+<tr>
+<td align="left">rank()</td>
+<td align="left">bigint</td>
+<td align="left">有间隔的当前行排名；与它的第一个相同行的row_number相同</td>
+</tr>
+<tr>
+<td align="left">dense_rank()</td>
+<td align="left">bigint</td>
+<td align="left">没有间隔的当前行排名；这个函数计数对等组</td>
+</tr>
+<tr>
+<td align="left">percent_rank</td>
+<td align="left">double precision</td>
+<td align="left">当前行的相对排名：（rank-1）/(总行数-1)</td>
+</tr>
+<tr>
+<td align="left">cume_dist()</td>
+<td align="left">double precision</td>
+<td align="left">当前行的相对排名：（前面的行数或与当前行相同的行数）/（总行数）</td>
+</tr>
+<tr>
+<td align="left">ntile(num_buckets integer)</td>
+<td align="left">integer</td>
+<td align="left">从1到参数的整数范围，尽可能相等的划分分区</td>
+</tr>
+<tr>
+<td align="left">lag(value any [, offset integer [, default any ]])</td>
+<td align="left">类型同value</td>
+<td align="left">计算分区当前行的前offset行，返回value。如果没有这样的行，返回default替代。offset和default都是当前计算的结果。如果忽略了则offset默认是1，default默认是null</td>
+</tr>
+<tr>
+<td align="left">lead(value any [, offset integer [, default any ]])</td>
+<td align="left">类型同value</td>
+<td align="left">计算分区当前行的后offset行，返回value。如果没有这样的行，返回default替代。offset和default都是当前计算的结果。如果忽略了则offset默认是1，default默认是null</td>
+</tr>
+<tr>
+<td align="left">first_value(value any)</td>
+<td align="left">类型同value</td>
+<td align="left">返回窗口第一行的计算value值</td>
+</tr>
+<tr>
+<td align="left">last_value(value any)</td>
+<td align="left">类型同value</td>
+<td align="left">返回窗口最后一行的计算value值</td>
+</tr>
+<tr>
+<td align="left">nth_value(value any,nth integer)</td>
+<td align="left">类型同value</td>
+<td align="left">返回窗口的第nth行的计算value，从1开始计数，没有符合的行则返回null</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>window子句使用(分组后的再次划分)：</p>
+<table>
+<thead>
+<tr>
+<th align="left">关键字</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">preceding</td>
+<td align="left">往前</td>
+</tr>
+<tr>
+<td align="left">following</td>
+<td align="left">往后</td>
+</tr>
+<tr>
+<td align="left">current row</td>
+<td align="left">当前行</td>
+</tr>
+<tr>
+<td align="left">unbounded</td>
+<td align="left">起点</td>
+</tr>
+<tr>
+<td align="left">unbounded preceding</td>
+<td align="left">表示从前面的起点</td>
+</tr>
+<tr>
+<td align="left">unbounded following</td>
+<td align="left">表示到后面的终点</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2022/05/26/">leeblog.icu/2022/05/26/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>
+</div><div id="donate"><link rel="stylesheet" type="text/css" href="/css/donate.css?v=1.0.0"><script type="text/javascript" src="/js/donate.js?v=1.0.0" successtext="复制成功!"></script><a class="pos-f tr3" id="github" href="https://github.com/Kaiyuan/donate-page" target="_blank" title="Github"></a><div id="DonateText">Donate</div><ul class="list pos-f" id="donateBox"><li id="AliPay" qr="https://s1.ax1x.com/2022/05/23/XpwOzt.jpg"></li><li id="WeChat" qr="https://s1.ax1x.com/2022/05/23/Xpd73q.jpg"></li></ul><div class="pos-f left-100" id="QRBox"><div id="MainBox"></div></div></div><script type="text/javascript" src="/js/share.js?v=1.0.0" async></script><a class="article-share-link" data-url="leeblog.icu/2022/05/26/" data-id="cl3mtve8t0000vyxb5v665l6d" data-qrcode="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAAAAAAZai4+AAABWElEQVR42u3ayw7CMAxEUf7/p8u2Eqo7YycLMjerqoBygpSX7c9Hbtet1W9+P72/X9xgwTqIdZVNQTx9R+E+0mHBimQ9zdD6uR6e+1tYsGDpLBcHCxas3QuEsrXDggVLZ00mdn1c3n6WhwXrCJYe1Zk/b4lvwYL156zLbJMt3OgFFqwwlj6BlS3Zvei+hINhwQpj6dNb6dhN1RgpFliwjmYp18h5eFdfbmDBymTVHegbs1KgUL+BBSuTtSMpUo/e+G9gwYphud24w5gkSmHBSmP1DspuGsZeIGDBimQZRTlmAVAvTAwLVjKrVzSwqupBCunCgnUcq1kKMAgqSYEnWLDCWO7U1W/D+kIzqhyEBesg1o7CO/30+4iGBSuS1TsKL16HVsW3YMGKZLkletIAYMGCtSg8pF+JX+pzYcGKYfVKyXvLRDO5AgvW0axeGUHdzWiThgUri/UF8STuNvFRbtUAAAAASUVORK5CYII=">分享</a><div class="tags"><a href="/tags/postgres"><i class="fa fa-tag">postgres</i></a></div><div class="post-nav"><a class="next" href="/2022/05/24/">记录一次机器断电后pg的重启失败的故障解决</a></div><div id="lv-container" data-id="city" data-uid="MTAyMC81MTcwMC8yODE4MQ=="><script>(function(d, s) {
+  var j, e = d.getElementsByTagName(s)[0];
+  if (typeof LivereTower === 'function') { return; }
+  j = d.createElement(s);
+  j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+  j.async = true;
+  e.parentNode.insertBefore(j, e);
+})(document, 'script');
+</script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/%E4%BB%A3%E7%A0%81/">代码</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/%E5%B7%A5%E5%85%B7/">工具</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E9%9A%8F%E7%AC%94/">随笔</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/GIT/" style="font-size: 15px;">GIT</a> <a href="/tags/%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83/" style="font-size: 15px;">开发规范</a> <a href="/tags/%E6%8F%92%E4%BB%B6/" style="font-size: 15px;">插件</a> <a href="/tags/%E5%B7%A5%E5%85%B7/" style="font-size: 15px;">工具</a> <a href="/tags/%E9%9A%8F%E7%AC%94/" style="font-size: 15px;">随笔</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/x%E9%A1%B5%E4%BB%A3%E7%A0%81/" style="font-size: 15px;">x页代码</a> <a href="/tags/wechat/" style="font-size: 15px;">wechat</a> <a href="/tags/%E4%BB%A3%E7%A0%81/" style="font-size: 15px;">代码</a> <a href="/tags/%E6%96%87%E6%A1%A3/" style="font-size: 15px;">文档</a> <a href="/tags/idea/" style="font-size: 15px;">idea</a> <a href="/tags/%E5%BC%80%E6%BA%90/" style="font-size: 15px;">开源</a> <a href="/tags/postgres/" style="font-size: 15px;">postgres</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2022/05/26/">PG窗口函数的应用实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/05/24/">记录一次机器断电后pg的重启失败的故障解决</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/05/12/">Navicat16 破解（重置试用）</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/04/29/">Idea常用插件及简介</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/04/26/">Jetbrains旗下所有产品激活方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/10/10/">优秀开源项目之Shift-etl,从此告别无意义加班</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/13/">idea插件git commit template的使用与changeLog的生成</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/10/">GIT Flow流程管理规范</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/08/">Markdown语法与Pandoc转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/05/">Maven插件之git-commit-id</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="https://solo8world.github.io/leeblog/" title="暂无" target="_blank">暂无</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2022 <a href="/." rel="nofollow">Lee Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script><script type="text/javascript" src="//lib.baomitu.com/fancybox/latest/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=1.0.0" async></script><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/fancybox/latest/jquery.fancybox.min.css"><link rel="stylesheet" type="text/css" href="/css/search.css?v=1.0.0"><script type="text/javascript" src="/js/search.js?v=1.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+  search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/copycode.js?v=1.0.0" successtext="复制成功!"></script><link rel="stylesheet" type="text/css" href="/css/copycode.css?v=1.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=1.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=1.0.0"></script></div></body></html>
