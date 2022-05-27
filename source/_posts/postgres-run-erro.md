@@ -1,11 +1,11 @@
 ---
-title: 记录一次机器断电后pg的重启失败的故障解决
+title: 记录一次机房停电后PG故障的解决
 date: 2022-05-24 19:25:48
 tags:
 - postgres
 categories:
 - [技术]
-description: 常用的sql语句往往只支持单一的数据范围统计，而窗口函数支持更加灵活更加多样的数据范围划定
+description: 测试环境postgreSQL数据库是以docker容器部署的单节点服务，机器在本地机房里。
 ---
 
 ```azure
@@ -61,13 +61,13 @@ description: 常用的sql语句往往只支持单一的数据范围统计，而�
 ## 总结:
 使用到的命令按执行顺序如下:
 ```bash
-$docker ps -a                          #查看容器列表
-$docker logs -f --tail 200 pg          #查看pg容器启动日志
-$docker inspect pg                     #查看容器配置详情
-$docker update --restart=no pg         #取消失败自动重启
-$docker run -it  -v   /opt/appdata/pgdata:/var/lib/postgresql/data  --env PGDATA=/var/lib/postgresql/data/pgdata  postgres:13   /bin/bash  ##启动临时容器并进入bash
-$su postgres                          #临时容器内:切换postgres用户
-$pg_resetwal -f /var/lib/postgresql/data/pgdata  #临时容器内: 利用pg工具，执行事务日志重置
-$exit                                 #临时容器内:退出容器
-$docker start pg                      #启动pg容器
+docker ps -a                          #查看容器列表
+docker logs -f --tail 200 pg          #查看pg容器启动日志
+docker inspect pg                     #查看容器配置详情
+docker update --restart=no pg         #取消失败自动重启
+docker run -it  -v   /opt/appdata/pgdata:/var/lib/postgresql/data  --env PGDATA=/var/lib/postgresql/data/pgdata  postgres:13   /bin/bash  ##启动临时容器并进入bash
+su postgres                          #临时容器内:切换postgres用户
+pg_resetwal -f /var/lib/postgresql/data/pgdata  #临时容器内: 利用pg工具，执行事务日志重置
+exit                                 #临时容器内:退出容器
+docker start pg                      #启动pg容器
 ```
