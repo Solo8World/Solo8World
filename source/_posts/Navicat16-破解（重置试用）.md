@@ -33,14 +33,14 @@ pacman -S dconf-editor&&dconf-ecditor
 
 启动后右键选中重置即可。
 
-### 2.删除navicat配置文件
+### 2.删除navicat配置文件or编辑navicat配置文件
 
 ```bash
 rm -rf ~/.config/navicat/Premium/preferences.json
 ```
-不过该方法会直接把原本本地配置的链接或密码删除，打开navicat后需要重新配置链接,
-笔者是登陆了navicat的云帐号，数据库链接和分组可以直接同步下来，但是密码还是要再输一遍，
-所以后续会尝试通过编辑该配置json,看能否通过删除部分可疑的密钥来实现重置。
+不过该方法会直接把原本本地配置的链接或密码删除，打开navicat后需要重新配置链接。
+所以这里可以编辑preferences.json文件，删除json的第一个hash码字段即可。
+
 
 
 ### 最后
