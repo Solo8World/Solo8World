@@ -1,11 +1,11 @@
 ---
-title: PG下常用的自建函数
-date: 2022-06-03 00:22:48
+title: PG下FDW插件使用
+date: 2022-06-29 19:35:58
 tags:
 - postgres
 categories:
 - [技术]
-toc: true
+toc: false
 description: postgres fdw是一种外部访问接口，它可以被用来访问存储在外部的数据，这些数据可以是外部的pg数据库，也可以oracle、mysql、mongo、redis等数据库，甚至可以是文件。
 ---
 
@@ -40,7 +40,7 @@ CREATE FOREIGN DATA WRAPPER mysql_fdw;
 
 ## 使用
 
-#### 1.创建该数据源的服务器对象
+### 1.创建该数据源的服务器对象
 
 ```
 --创建服务连接信息
@@ -57,7 +57,7 @@ OPTIONS (username 'rwbj', password '22eaa714ae0b49e09808233f3d3d6212');
 --DROP USER MAPPING FOR bitest SERVER erp_server
 ```
 
-#### 2. 创建外部表（三种方式）
+### 2. 创建外部表（三种方式）
 ```
 --创建外部数据表（指定字段）
 CREATE FOREIGN TABLE erp_contract (id bigint) server erp_server
@@ -71,7 +71,7 @@ import foreign schema erp limit to (erp_rent_shop,erp_sys_user) from server erp_
 import foreign schema erp from server erp_server into bi;
 ```
 
-#### 3. 使用外部表
+### 3. 使用外部表
 ```
 --然后，像对自家表一样操作外部数据源mysql
 select * from erp_contract;
@@ -80,7 +80,7 @@ update erp_contract set id= 1 where id = 1;
 delete from erp_contract where id  = 1;
 ```
 
-#### 4. 删除外部表
+### 4. 删除外部表
 ```
 -- 指定表名称，删除多个外部表
 drop foreign table bi.erp_contract, bi.erp_rent_shop;
@@ -94,7 +94,7 @@ where t.table_type in ('FOREIGN')
 
 ```
 
-#### 5.扩展
+### 5.扩展
 
 由FDW实现原理可知，PG本身没有对外部数据源进行存储管理（也不可能），每次访问都是通过下推到外部数据库进行的执行。对于读数据频次较大、或数据量较多、或复杂查询的场景（比如BI统计），我们可以通过物化外部数据来减轻对外部数据源的压力和执行开销，如下：
 
