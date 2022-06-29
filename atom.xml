@@ -6,7 +6,7 @@
   <link href="leeblog.icu/atom.xml" rel="self"/>
   
   <link href="leeblog.icu/"/>
-  <updated>2022-06-03T14:26:47.357Z</updated>
+  <updated>2022-06-29T15:11:32.903Z</updated>
   <id>leeblog.icu/</id>
   
   <author>
@@ -15,6 +15,48 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>PG下FDW插件使用</title>
+    <link href="leeblog.icu/2022/06/29/"/>
+    <id>leeblog.icu/2022/06/29/</id>
+    <published>2022-06-29T11:35:58.000Z</published>
+    <updated>2022-06-29T15:11:32.903Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>postgres fdw是一种外部访问接口，它可以被用来访问存储在外部的数据，这些数据可以是外部的pg数据库，也可以oracle、mysql、mongo、redis等数据库，甚至可以是文件。</p><p>截止到目前为止, 全世界已有了成百上千种数据源有了相应的FDW实现, 从传统的文件系统到各种新型的Nosql数据库, 甚至还包括互联网上的Web Service。</p><p>目前支持的fdw外部数据源：<a href="https://wiki.postgresql.org/wiki/Foreign_data_wrappers">https://wiki.postgresql.org/wiki/Foreign_data_wrappers</a></p><p>使用FDW的核心就在于使用外部表。尽管面向不同数据源的FDW实现各有不同, 但是受益于SQL/MED定义的标准, 创建不同数据源的外部表的方法都是一样的, 这里我们拿mysql_fdw做示例。</p><h2 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h2><p><code>执行sql访问外部数据源</code>-&gt;<code>sql解析</code>-&gt;<code>下推至外部数据源执行</code>-&gt;<code>返回数据结果</code></p><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line"><span class="comment">--向PG安装某个数据源的FDW扩展</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">EXTENSION</span> mysql_fdw;</span><br><span class="line"><span class="comment">--drop EXTENSION mysql_fdw;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">--创建该数据源的FDW对象</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">FOREIGN DATA</span> <span class="keyword">WRAPPER</span> mysql_fdw;</span><br><span class="line"><span class="comment">--DROP  FOREIGN DATA WRAPPER mysql_fdw;</span></span><br></pre></td></tr></table></figure><h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><h3 id="1-创建该数据源的服务器对象"><a href="#1-创建该数据源的服务器对象" class="headerlink" title="1.创建该数据源的服务器对象"></a>1.创建该数据源的服务器对象</h3><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">--创建服务连接信息</span><br><span class="line">CREATE<span class="built_in"> SERVER </span>erp_server</span><br><span class="line">     FOREIGN DATA WRAPPER mysql_fdw</span><br><span class="line">     OPTIONS (host <span class="string">&#x27;172.16.0.70&#x27;</span>,<span class="built_in"> port </span><span class="string">&#x27;3306&#x27;</span>);</span><br><span class="line">--DROP<span class="built_in"> SERVER </span>erp_server;</span><br><span class="line"></span><br><span class="line">--建立用户映射 `bitest`当前pg用户，`rwbj`外部数据源用户</span><br><span class="line">CREATE<span class="built_in"> USER </span>MAPPING <span class="keyword">FOR</span> bitest</span><br><span class="line">SERVER erp_server</span><br><span class="line">OPTIONS (username <span class="string">&#x27;rwbj&#x27;</span>, password <span class="string">&#x27;22eaa714ae0b49e09808233f3d3d6212&#x27;</span>);</span><br><span class="line"></span><br><span class="line">--DROP<span class="built_in"> USER </span>MAPPING <span class="keyword">FOR</span> bitest<span class="built_in"> SERVER </span>erp_server</span><br></pre></td></tr></table></figure><h3 id="2-创建外部表（三种方式）"><a href="#2-创建外部表（三种方式）" class="headerlink" title="2. 创建外部表（三种方式）"></a>2. 创建外部表（三种方式）</h3><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">--创建外部数据表（指定字段）</span><br><span class="line">CREATE FOREIGN TABLE erp_contract (id bigint)<span class="built_in"> server </span>erp_server</span><br><span class="line">    options (dbname <span class="string">&#x27;erp&#x27;</span>, table_name <span class="string">&#x27;erp_contract&#x27;</span>);</span><br><span class="line"></span><br><span class="line">--除了指定字段创建外部表以外，还可以直接导入指定表的所有字段</span><br><span class="line">import foreign schema erp limit <span class="keyword">to</span> (erp_rent_shop,erp_sys_user) <span class="keyword">from</span><span class="built_in"> server </span>erp_server into bi;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- 以及，一次性导入指定DB下的所有表</span><br><span class="line">import foreign schema erp <span class="keyword">from</span><span class="built_in"> server </span>erp_server into bi;</span><br></pre></td></tr></table></figure><h3 id="3-使用外部表"><a href="#3-使用外部表" class="headerlink" title="3. 使用外部表"></a>3. 使用外部表</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">--然后，像对自家表一样操作外部数据源mysql</span></span><br><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> erp_contract;</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> erp_contract (<span class="keyword">id</span>) <span class="keyword">values</span> (<span class="number">1</span>);</span><br><span class="line"><span class="keyword">update</span> erp_contract <span class="keyword">set</span> <span class="keyword">id</span>= <span class="number">1</span> <span class="keyword">where</span> <span class="keyword">id</span> = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> erp_contract <span class="keyword">where</span> <span class="keyword">id</span>  = <span class="number">1</span>;</span><br></pre></td></tr></table></figure><h3 id="4-删除外部表"><a href="#4-删除外部表" class="headerlink" title="4. 删除外部表"></a>4. 删除外部表</h3><figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 指定表名称，删除多个外部表</span></span><br><span class="line"><span class="keyword">drop</span> <span class="keyword">foreign</span> <span class="keyword">table</span> bi.erp_contract, bi.erp_rent_shop;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 或者构造sql语句批量删除</span></span><br><span class="line"><span class="keyword">select</span></span><br><span class="line"><span class="string">&#x27;drop foreign table &#x27;</span> || t.table_schema || <span class="string">&#x27;.&#x27;</span> || t.<span class="built_in">table_name</span> || <span class="string">&#x27;;&#x27;</span> <span class="keyword">as</span> drop_sql</span><br><span class="line"><span class="keyword">from</span> information_schema.<span class="keyword">tables</span> t</span><br><span class="line"><span class="keyword">where</span> t.table_type <span class="keyword">in</span> (<span class="string">&#x27;FOREIGN&#x27;</span>)</span><br><span class="line"><span class="keyword">and</span> t.table_schema <span class="keyword">in</span> (<span class="string">&#x27;bi&#x27;</span>);</span><br><span class="line"></span><br></pre></td></tr></table></figure><h3 id="5-扩展"><a href="#5-扩展" class="headerlink" title="5.扩展"></a>5.扩展</h3><p>由FDW实现原理可知，PG本身没有对外部数据源进行存储管理（也不可能），每次访问都是通过下推到外部数据库进行的执行。对于读数据频次较大、或数据量较多、或复杂查询的场景（比如BI统计），我们可以通过物化外部数据来减轻对外部数据源的压力和执行开销，如下：</p><figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line"><span class="comment">--创建物化视图</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">MATERIALIZED</span> <span class="keyword">VIEW</span> erp_contract_view <span class="keyword">as</span> <span class="keyword">select</span> * <span class="keyword">from</span> erp_contract;</span><br><span class="line"><span class="comment">--定期刷新物化视图</span></span><br><span class="line"><span class="keyword">REFRESH</span> <span class="keyword">MATERIALIZED</span> <span class="keyword">VIEW</span> erp_contract_view;</span><br></pre></td></tr></table></figure><p>也可以创建pg本地表来对第三方数据源的数据进行定期增量同步：</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">--创建pg本地表</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span>  erp_contract_t <span class="keyword">as</span> <span class="keyword">select</span> * <span class="keyword">from</span> erp_contract;</span><br><span class="line"><span class="comment">--同步数据</span></span><br><span class="line"><span class="keyword">DELETE</span></span><br><span class="line"><span class="keyword">FROM</span> erp_contract_t t</span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">EXISTS</span>(<span class="keyword">SELECT</span> <span class="number">1</span> <span class="keyword">FROM</span> erp_contract f <span class="keyword">WHERE</span> t.id = f.id);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> erp_contract_t      <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> erp_contract;</span><br></pre></td></tr></table></figure><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>之前一直没有使用过pg的fdw扩展,因为EAM的数据可视化需求的实现方案涉及到了，所以去了解试用了一下。</p><p>方便规范，整体可用，直接免去了在星汉内部系统中数据共享与交换的开发成本。</p><p>但该方案跟育铜讨论后，育铜提出了后期维护与管理不透明的主张。确是如此，我明白后期维护与管理的弊端。</p><p>但我没想明白的是：如果如此的话，FDW的存在还有什么意义呢？也许FDW还需要一个web管理？我不知道Pigsty是否对此作了支持，后面去看一下。</p><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2022/06/29/">leeblog.icu/2022/06/29/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
+    
+    
+    <summary type="html">postgres fdw是一种外部访问接口，它可以被用来访问存储在外部的数据，这些数据可以是外部的pg数据库，也可以oracle、mysql、mongo、redis等数据库，甚至可以是文件。</summary>
+    
+    
+    
+    <category term="技术" scheme="leeblog.icu/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="postgres" scheme="leeblog.icu/tags/postgres/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>当PG遇上Mysql</title>
+    <link href="leeblog.icu/2022/06/22/"/>
+    <id>leeblog.icu/2022/06/22/</id>
+    <published>2022-06-21T16:38:48.000Z</published>
+    <updated>2022-06-29T15:09:58.047Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="什么是PG？"><a href="#什么是PG？" class="headerlink" title="什么是PG？"></a>什么是PG？</h3><p>PostgreSQL是一个功能强大且完全开源的数据库。它提供了单个完整功能的版本，而不像MySQL那样提供了多个不同的社区版、商业版与企业版。<br>PostgreSQL基于自由的BSD/MIT许可，任何组织可以任意使用、修改以及重新分发代码。事实上国内阿里以及腾讯号称自研的商业数据库也都是基于PostgreSQL衍生的。</p><h3 id="为什么是PG？"><a href="#为什么是PG？" class="headerlink" title="为什么是PG？"></a>为什么是PG？</h3><blockquote><p>一切都是相对的，一切事物都需要参照物，没有对比就没有优劣。虽然PG方方面面对标的一直是Oracle，但是由于Oracle收费，所以我们在技术选型时，往往会将MySQL跟PG做对比，所以我们在这里也选择MySQL来吊打。</p></blockquote><h4 id="总体描述"><a href="#总体描述" class="headerlink" title="总体描述"></a>总体描述</h4><ul><li><code>PG</code>：”最先进的开源关系型数据库“。</li><li><code>MySQL</code>：”最流行的开源关系型数据库“。</li></ul><h4 id="商业环境"><a href="#商业环境" class="headerlink" title="商业环境"></a>商业环境</h4><ul><li><p><code>开源协议</code>：PG遵循BSD/MIT许可,任何企业任何组织可以任意使用甚至修改再盈利，而MySQL基于GPL许可,也允许企业免费使用，但随着MySQL被oracle公司收购，在商业版和社区版之间的功能取舍上也难免会有厚此薄彼之嫌。<code>PG赢</code></p></li><li><p><code>发行版本</code>：PG提供了单个完整功能的版本，MySQL提供了多个不同的社区版、商业版与企业版。<code>PG赢</code></p></li><li><p><code>大版本发布速度</code>: PG每年一个大版本发布，大版本发布的第二年就可以上生产环境，版本迭代速度很快。MySQL的大版本发布一般是2年~3年，一般大版本发布后的第二年才可以上生产环境，避免有坑，版本发布速度比较慢。这也是由于MySQL的维护者是商业公司导致，各有优劣。<code>平局</code></p></li><li><p><code>流行趋势</code>：不可否认MySQL依旧是当前Web项目中的顶流，开发者MySQL技能必备，对PG有一定技术积累的还是相对较少。但近年来PG也在慢慢进入人们的视野，流行度呈逐步上升的趋势。MySQL赢。</p></li></ul><h4 id="技术实现"><a href="#技术实现" class="headerlink" title="技术实现"></a>技术实现</h4><ul><li><p><code>支持的数据类型</code>：由于PG的大而全，所以整个PG的复杂度相对较高，从PG支持的数据类型里可见一斑，常见的数值、文本、日期、布尔、json等基础类型支持不必赘述，其他类型几乎应有仅有，如货币类型、网络地址类型、枚举类型、几何类型、文本搜索类型（支持全文检索及分词）、XML类型、数组类型、范围类型等等等。甚至你可以自定义一个对象类型。而MySQL仅支持基础类型。<code>PG赢</code></p></li><li><p><code>索引类型</code>：<br>PG支持多种索引类型btree , hash , gin , gist , sp-gist , brin , bloom , rum , zombodb , bitmap，部分索引，表达式索引;MySQL仅支持btree 索引，全文索引（低效），表达式索引(需要建虚拟列)，hash 索引只在内存表。<code>PG赢</code></p></li><li><p><code>SQL特性支持</code>:<br>PGSQL特性支持94种，SQL语法支持最完善，例如：支持公用表表达式（WITH查询、窗口函数、递归查询等）。MySQL的SQL特性支持情况支持36种，SQL语法支持比较弱，WITH查询、窗口函数、递归查询概不支持。PG赢。</p></li><li><p><code>DDL操作</code>：PGSQL加字段、可变长字段类型长度改大不会锁表，所有的DDL操作都不需要借助第三方工具，并且跟商业数据库一样，DDL操作可以回滚，保证事务一致性。<br>而MySQL由于大部分DDL操作都会锁表，例如加字段、可变长字段类型长度改大，特别是对大表进行DDL操作DDL操作不能回滚。PG赢。</p></li><li><p>物化视图：PGSQL支持物化视图;MySQL不支持物化视图。PG赢。</p></li><li><p><code>MVCC机制实现的区别</code>：MySQL基于回滚段实现的MVCC机制,但是MySQL的间隙锁影响较大，锁定数据较多，对高并发的支持有限。PG基于XID的MVCC机制进行多版本存储,保证了对高并发的支持，解决了数据库常见瓶颈问题。这种机制也导致PG的维护成本稍微高了那么一点点（需要定期VACUUM）。不考虑业务场景的情况下，平局。</p></li></ul><h4 id="运行维护"><a href="#运行维护" class="headerlink" title="运行维护"></a>运行维护</h4><ul><li><p><code>CPU限制</code>：PGSQL没有CPU核心数限制，有多少CPU核就用多少MySQL能用128核CPU，超过128核用不上。PG赢。</p></li><li><p><code>配置文件参数</code>：PGSQL一共有255个参数，用到的大概是80个，参数比较稳定，用上个大版本配置文件也可以启动当前大版本数据库。MySQL一共有707个参数，用到的大概是180个，参数不断增加，就算小版本也会增加参数，大版本之间会有部分参数不兼容情况。PG赢。</p></li><li><p><code>第三方工具依赖情况</code>：PG只有高可用集群需要依靠第三方中间件，例如：patroni+etcd、repmgr; MySQL大部分操作都要依靠percona公司的第三方工具（percona-toolkit，XtraBackup），工具命令太多，学习成本高，高可用集群也需要第三方中间件，官方MGR集群还没成熟。PG赢。</p></li><li><p><code>高可用主从复制底层原理</code>: PG物理流复制，属于物理复制，跟SQL Server镜像/AlwaysOn一样，严格一致，没有任何可能导致不一致，性能和可靠性上，物理复制完胜逻辑复制，维护简单MySQL主从复制，属于逻辑复制，（sql_log_bin、binlog_format等参数设置不正确都会导致主从不一致）大事务并行复制效率低。PG赢。</p></li></ul><h4 id="学习曲线"><a href="#学习曲线" class="headerlink" title="学习曲线"></a>学习曲线</h4><p>对于简单的业务逻辑，MySQL与PG在性能和效率上并没有太大差距，在开发效率上切换成本并没有很高，相当于之前MySQL现在切换成Oracle，CRUD语句并没有太大差别。<br>而对于复杂的查询统计逻辑，MySQL和PG在性能和执行效率上是有天壤之别的，在开发效率上基本没啥可比性，因为MySQL它根本就不支持一些复杂的逻辑查询。而开发者确实是需要不断提升对PG特性的熟悉程度，才能快速的开发。而这种丰富性或者说是复杂性，恰恰是PG的优势，并非PG的缺陷。 平局。</p><h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>MySQL是应用开发者创建出来的DBMS；而PostgreSQL是由数据库开发者创建出来的DBMS 。换句话说，MySQL倾向于使用者的角度，回答的问题是 “你想解决的是什么问题”；而PostgreSQL倾向于理论角度，回答的问题是 “数据库应该如何来解决问题” 。</p><p>MySQL一般会将数据合法性验证交给客户；PostgreSQL在合法性方面做得比较严格。比如MySQL里插入 “2012-02-30” 这个时间时，会成功，但结果会是 “0000-00-00”；PostgreSQL不允许插入此值。</p><p>通常，PostgreSQL 被认为特性丰富，且对复杂查询的效率更高，而MySQL被认为在简单查询速度更快。但这个观点基本是在 MySQL 4.x / PostgreSQL 7.x 的事情，现在情况已经变了，PostgreSQL 在9.x版本速度上有了很大的改进，而MySQL特性也在增加(但MySQL的商业背景决定了它无法在特性支持上跟PG比拟)。</p><p>从应用场景来说，PG更加适合严格的企业应用场景（比如BI、金融、电信、ERP、CRM），而MySQL更加适合业务逻辑相对简单、数据可靠性要求较低的互联网场景（其实相对PG来说也有并发插入的瓶颈问题）。PG赢麻了。</p><h3 id="怎么开始？"><a href="#怎么开始？" class="headerlink" title="怎么开始？"></a>怎么开始？</h3><p>我相信随着外界技术环境的不断升级、随着我们项目的不断优化，会有越來越多的系统会对PG予以青睐，欢迎拥抱PostgreSQL。</p><h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="https://www.postgresql.org/about/">https://www.postgresql.org/about/</a></p><p><a href="https://www.runoob.com/postgresql/postgresql-tutorial.html">https://www.runoob.com/postgresql/postgresql-tutorial.html</a></p><p><a href="https://www.biaodianfu.com/mysql-vs-postgresql.html">https://www.biaodianfu.com/mysql-vs-postgresql.html</a></p><p><a href="https://www.zhihu.com/question/20010554/answer/2320511271">https://www.zhihu.com/question/20010554/answer/2320511271</a></p><p><a href="https://www.zhihu.com/question/20010554/answer/2280773945">https://www.zhihu.com/question/20010554/answer/2280773945</a></p><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2022/06/22/">leeblog.icu/2022/06/22/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
+    
+    
+    <summary type="html">一切都是相对的，一切事物都需要参照物，没有对比就没有优劣。虽然PG方方面面对标的一直是Oracle，但是由于Oracle收费，所以我们在技术选型时，往往会将MySQL跟PG做对比，所以我们在这里也选择MySQL来吊打</summary>
+    
+    
+    
+    <category term="技术" scheme="leeblog.icu/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="postgres" scheme="leeblog.icu/tags/postgres/"/>
+    
+  </entry>
   
   <entry>
     <title>PG下常用的自建函数</title>
@@ -426,27 +468,6 @@
     
     
     <summary type="html">仓老师这次很乖，他趴在那，一动不动，他走了...死亡，就这样立体直观的呈现在眼前。我蹲坐在那儿，一片茫然，不知所措。</summary>
-    
-    
-    
-    <category term="随笔" scheme="leeblog.icu/categories/%E9%9A%8F%E7%AC%94/"/>
-    
-    
-    <category term="随笔" scheme="leeblog.icu/tags/%E9%9A%8F%E7%AC%94/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Jack</title>
-    <link href="leeblog.icu/2019/03/10/"/>
-    <id>leeblog.icu/2019/03/10/</id>
-    <published>2019-03-10T10:39:20.000Z</published>
-    <updated>2020-10-08T01:43:34.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>Jack洗完衣服，照常换了大裤衩、趿拉着拖鞋出门了，找了个有信号的地方，点着烟。他看着列表里的Lucy，琢磨着发点啥，可他琢磨来琢磨去，没想出什么，Lucy反而在这时一条消息提示，“xxxxxxx，xxx”，Jack盯着这条信息，有些不太相信。他愣了半天，又狠狠的抽了一口，他想发个表情，大概可以掩饰一下自己的尴尬与不知所措，却没有得逞，“对方拒收了您的消息”。Jack看着这个夜晚，有颗很亮很亮的星，只有一颗，眨呀眨的。</p><p>jack抽完第二棵宏图便回去了，家里的烟他有些抽不惯了，没有的时候却想。摸摸裤兜的钥匙，开门。jack坐在床角，无数次他都一个人这么静静的坐着，好像什么都没想过，好像想了好多。竟有些享受这种滋味呢，jack想着。不一会儿，便躺下睡了。</p><p>这是Jack睡的最早的一个晚上，也是睡的最长的一个觉，没人不知道那天梦里他去了哪。没人关心这一切。</p><p align="right" >摘自某刊</p><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2019/03/10/">leeblog.icu/2019/03/10/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
-    
-    
-    <summary type="html">这是Jack睡的最早的一个晚上，也是睡的最长的一个觉，没人不知道那天梦里他去了哪。没人关心这一切。</summary>
     
     
     
