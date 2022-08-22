@@ -11,7 +11,6 @@ date: 2020-09-16 14:48:46
  祝你开心   <br/> <br/>
 Wish you happy <br/> <br/>
 
-噢对了，看懂了记得打赏一下，这是知识付费，给你自己充值，投资你自己是最稳赚不赔的，谢谢老板。
 
 
 <p align="right" ><b>EMAIL<b/>： ofzhuo@gmail.com</p>  
