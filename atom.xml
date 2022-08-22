@@ -6,7 +6,7 @@
   <link href="leeblog.icu/atom.xml" rel="self"/>
   
   <link href="leeblog.icu/"/>
-  <updated>2022-08-22T15:49:29.792Z</updated>
+  <updated>2022-08-22T15:55:34.803Z</updated>
   <id>leeblog.icu/</id>
   
   <author>
@@ -21,9 +21,9 @@
     <link href="leeblog.icu/2022/08/22/"/>
     <id>leeblog.icu/2022/08/22/</id>
     <published>2022-08-22T05:33:59.000Z</published>
-    <updated>2022-08-22T15:49:29.792Z</updated>
+    <updated>2022-08-22T15:55:34.803Z</updated>
     
-    <content type="html"><![CDATA[<h3 id="Pacman-yay-无用软件包清理-大概5GB"><a href="#Pacman-yay-无用软件包清理-大概5GB" class="headerlink" title="Pacman/yay 无用软件包清理 大概5GB"></a>Pacman/yay 无用软件包清理 <code>大概5GB</code></h3><p>清理旧版本包及已卸载的包：<br> <figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">pacman -Scc</span></span><br></pre></td></tr></table></figure></p><p>清理孤立的未使用的包：<br> <figure class="highlight lisp"><table><tr><td class="code"><pre><span class="line">pacman -R (<span class="name">pacman</span> -Qdtq)</span><br></pre></td></tr></table></figure></p><h3 id="systemd日志文件清理与存储设置-大概4GB"><a href="#systemd日志文件清理与存储设置-大概4GB" class="headerlink" title="systemd日志文件清理与存储设置  大概4GB"></a>systemd日志文件清理与存储设置  <code>大概4GB</code></h3><p>推荐：设置最大存储时间：</p> <figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">journalctl <span class="attribute">--vacuum-time</span>=1months</span><br></pre></td></tr></table></figure><p>设置最大存储量：</p> <figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">journalctl <span class="attribute">--vacuum-size</span>=50M</span><br></pre></td></tr></table></figure><p>（按需选择其一即可）</p><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2022/08/22/">leeblog.icu/2022/08/22/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
+    <content type="html"><![CDATA[<h3 id="pacman-yay-无用软件包清理"><a href="#pacman-yay-无用软件包清理" class="headerlink" title="pacman/yay 无用软件包清理"></a>pacman/yay 无用软件包清理</h3><p><code>大概5GB</code></p><p>清理旧版本包及已卸载的包：<br> <figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">pacman -Scc</span></span><br></pre></td></tr></table></figure></p><p>清理孤立的未使用的包：<br> <figure class="highlight lisp"><table><tr><td class="code"><pre><span class="line">pacman -R (<span class="name">pacman</span> -Qdtq)</span><br></pre></td></tr></table></figure></p><h3 id="systemd日志文件清理与存储设置"><a href="#systemd日志文件清理与存储设置" class="headerlink" title="systemd日志文件清理与存储设置"></a>systemd日志文件清理与存储设置</h3><p><code>大概4GB</code></p><p>推荐：设置最大存储时间：</p> <figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">journalctl <span class="attribute">--vacuum-time</span>=1months</span><br></pre></td></tr></table></figure><p>设置最大存储量：</p> <figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">journalctl <span class="attribute">--vacuum-size</span>=50M</span><br></pre></td></tr></table></figure><p>（按需选择其一即可）</p><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2022/08/22/">leeblog.icu/2022/08/22/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
     
     
     <summary type="html">某日公司办公电脑磁盘空间告警，遂进行清理，记录一下</summary>
@@ -188,9 +188,9 @@
     <category term="工具" scheme="leeblog.icu/categories/%E6%8A%80%E6%9C%AF/%E5%B7%A5%E5%85%B7/"/>
     
     
-    <category term="工具" scheme="leeblog.icu/tags/%E5%B7%A5%E5%85%B7/"/>
-    
     <category term="插件" scheme="leeblog.icu/tags/%E6%8F%92%E4%BB%B6/"/>
+    
+    <category term="工具" scheme="leeblog.icu/tags/%E5%B7%A5%E5%85%B7/"/>
     
   </entry>
   
@@ -263,11 +263,11 @@
     <category term="工具" scheme="leeblog.icu/categories/%E6%8A%80%E6%9C%AF/%E5%B7%A5%E5%85%B7/"/>
     
     
+    <category term="工具" scheme="leeblog.icu/tags/%E5%B7%A5%E5%85%B7/"/>
+    
     <category term="GIT" scheme="leeblog.icu/tags/GIT/"/>
     
     <category term="开发规范" scheme="leeblog.icu/tags/%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83/"/>
-    
-    <category term="工具" scheme="leeblog.icu/tags/%E5%B7%A5%E5%85%B7/"/>
     
   </entry>
   
@@ -392,9 +392,9 @@
     
     <category term="x页代码" scheme="leeblog.icu/tags/x%E9%A1%B5%E4%BB%A3%E7%A0%81/"/>
     
-    <category term="wechat" scheme="leeblog.icu/tags/wechat/"/>
-    
     <category term="代码" scheme="leeblog.icu/tags/%E4%BB%A3%E7%A0%81/"/>
+    
+    <category term="wechat" scheme="leeblog.icu/tags/wechat/"/>
     
   </entry>
   
