@@ -6,7 +6,7 @@
   <link href="leeblog.icu/atom.xml" rel="self"/>
   
   <link href="leeblog.icu/"/>
-  <updated>2022-06-29T15:11:32.903Z</updated>
+  <updated>2022-08-22T15:49:29.792Z</updated>
   <id>leeblog.icu/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Arch系统磁盘空间清理</title>
+    <link href="leeblog.icu/2022/08/22/"/>
+    <id>leeblog.icu/2022/08/22/</id>
+    <published>2022-08-22T05:33:59.000Z</published>
+    <updated>2022-08-22T15:49:29.792Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="Pacman-yay-无用软件包清理-大概5GB"><a href="#Pacman-yay-无用软件包清理-大概5GB" class="headerlink" title="Pacman/yay 无用软件包清理 大概5GB"></a>Pacman/yay 无用软件包清理 <code>大概5GB</code></h3><p>清理旧版本包及已卸载的包：<br> <figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">pacman -Scc</span></span><br></pre></td></tr></table></figure></p><p>清理孤立的未使用的包：<br> <figure class="highlight lisp"><table><tr><td class="code"><pre><span class="line">pacman -R (<span class="name">pacman</span> -Qdtq)</span><br></pre></td></tr></table></figure></p><h3 id="systemd日志文件清理与存储设置-大概4GB"><a href="#systemd日志文件清理与存储设置-大概4GB" class="headerlink" title="systemd日志文件清理与存储设置  大概4GB"></a>systemd日志文件清理与存储设置  <code>大概4GB</code></h3><p>推荐：设置最大存储时间：</p> <figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">journalctl <span class="attribute">--vacuum-time</span>=1months</span><br></pre></td></tr></table></figure><p>设置最大存储量：</p> <figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">journalctl <span class="attribute">--vacuum-size</span>=50M</span><br></pre></td></tr></table></figure><p>（按需选择其一即可）</p><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2022/08/22/">leeblog.icu/2022/08/22/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
+    
+    
+    <summary type="html">某日公司办公电脑磁盘空间告警，遂进行清理，记录一下</summary>
+    
+    
+    
+    <category term="技术" scheme="leeblog.icu/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    <category term="linux" scheme="leeblog.icu/categories/%E6%8A%80%E6%9C%AF/linux/"/>
+    
+    
+    <category term="arch" scheme="leeblog.icu/tags/arch/"/>
+    
+    <category term="linux" scheme="leeblog.icu/tags/linux/"/>
+    
+  </entry>
   
   <entry>
     <title>PG下FDW插件使用</title>
@@ -447,27 +472,6 @@
     
     
     <summary type="html">于是她笑了，极大声，像是被晚风摇着的银铃</summary>
-    
-    
-    
-    <category term="随笔" scheme="leeblog.icu/categories/%E9%9A%8F%E7%AC%94/"/>
-    
-    
-    <category term="随笔" scheme="leeblog.icu/tags/%E9%9A%8F%E7%AC%94/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>再见仓老师</title>
-    <link href="leeblog.icu/2019/04/06/"/>
-    <id>leeblog.icu/2019/04/06/</id>
-    <published>2019-04-05T16:44:25.000Z</published>
-    <updated>2020-10-07T07:30:28.000Z</updated>
-    
-    <content type="html"><![CDATA[<blockquote><p>等待即是希望，即是一切美好的开始</p></blockquote><p>北京今天的空气达到了PM 10 367重污染，窗外的山没了，夕阳没了，取而代之的是厚重而浑浊的霾。我转身看了看桌上胡乱摆着的闲书，庆幸自己没出去。</p><p>看书、订餐、摆弄好长时间没碰的画架、午休、发呆、看电影、然后打两把游戏，一切都是那么稀松平常，静谧平淡，毫无意外，就像那两把游戏，都毫无意外的输掉。</p><p>大概晚上九点，照常起身去储藏室喂仓鼠。然后看到，仓老师这次很乖，他趴在那，一动不动，他走了。我不太清楚自己在那一刻是怎样一种情绪状态，我好像再次看到了幼时趴在哪里一动不动的狗狗，好像又看到了安静的像是睡去的人。死亡，就这样立体直观的呈现在眼前。我蹲坐在那儿，一片茫然，不知所措。</p><p>似乎心里一直都在为这一天的到来准备着，从他来到我的生活里。这次，他真的走了。之前工作比较忙的时候，忙到需要直接就近睡酒店的时候，我想，我要回家，因为他在等我，我家里有牵挂，像是那些有家室的同事一样。这次，真的没了。</p><p>于是踉踉跄跄的滚回了卧室，坐在那儿缓了好一会儿。</p><p>沉默，沉默，一切寂静的不像话。</p><p>没哭。</p><p>我打定主意，要为他买朵花，与他一起葬进土里。不是因为他多么喜欢花，只是自私的为自己，为自己寻求一点安慰。</p><p>生命，自从诞生便开始死亡的过程，一分一秒，直至尽头。</p><p>我便顿时明白了，等待戈多，戈多即死神。</p><p>后来又觉得太直白而残酷，附上另一句：等待即是希望，即是一切美好的开始。以哄骗世人，同时忽悠自己走下去。我们别无选择。</p><p>把储藏室打扫干净。给他买的菜没喂完，就扔了。为他新买的小房子还没到，就退了。好像他从未来过，除了那朵花在微风中摇曳，直至凋零、枯去，化作春泥。</p><p>同日，我妈电话来兴奋的告知我：家里的狗子生了，三只小狗商量好似的都是黑黝黝的，尚未睁眼，很是可爱。唠叨着：再过几天定是满院子撒欢儿了。</p><p>一切美好的开始。  </p><p align="right" >一九年四月六日</p><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2019/04/06/">leeblog.icu/2019/04/06/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
-    
-    
-    <summary type="html">仓老师这次很乖，他趴在那，一动不动，他走了...死亡，就这样立体直观的呈现在眼前。我蹲坐在那儿，一片茫然，不知所措。</summary>
     
     
     
