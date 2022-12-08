@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>主机暴毙，PG驾崩，视图数据损坏修复过程</title>
+      <link href="2022/12/07/"/>
+      <url>2022/12/07/</url>
+      
+        <content type="html"><![CDATA[<figure class="highlight subunit"><table><tr><td class="code"><pre><span class="line"><span class="keyword">ERROR:  </span>could not open file &quot;base/67201/11128463&quot;: No such file or directory</span><br></pre></td></tr></table></figure><figure class="highlight subunit"><table><tr><td class="code"><pre><span class="line"><span class="keyword">ERROR:  </span>cache lookup failed for relation 11128951</span><br></pre></td></tr></table></figure><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>测试环境postgreSQL数据库是以docker容器部署的单节点服务，机器在本地机房里。</p><p>测试服务器又又又突然挂了，重启机器后pg又又未能重启，参照<a href="https://leeblog.icu/2022/05/24/">记录机器断电后PG故障的解决</a><br>解决后，成功启动。</p><p>但成功启动后发现部分物化视图查询报错</p><figure class="highlight livecodeserver"><table><tr><td class="code"><pre><span class="line">could <span class="keyword">not</span> <span class="built_in">open</span> <span class="built_in">file</span> <span class="string">&quot;base/67201/11128463&quot;</span>: No such <span class="built_in">file</span> <span class="keyword">or</span> <span class="built_in">directory</span></span><br></pre></td></tr></table></figure><h2 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h2><ul><li><p>猜测是由于服务器挂掉的时候，物化视图正在执行更新操作，突然断开导致视图数据文件损坏。</p></li><li><p>遂尝试刷新物化视图，以期待能够重建数据文件</p>  <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">refresh materialized view  bi_view_real_time_sale_period_market_all;</span><br></pre></td></tr></table></figure><p>不曾想又报了一错：</p>  <figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line">[XX000] ERROR: <span class="keyword">cache</span> lookup failed for relation <span class="number">11128466</span></span><br></pre></td></tr></table></figure></li><li><p>可想而知该视图已被锁定<br>尝试删除视图，失败，同样的锁定错误。</p></li><li><p>遂进行引用删除（注意备份视图创建语句）</p><ul><li><p>查询视图oid</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">oid</span>, relname,relfilenode <span class="keyword">from</span> pg_class <span class="keyword">where</span> relname <span class="keyword">like</span> <span class="string">&#x27;%bi_view_real_time_sale_period_market_all%&#x27;</span>;</span><br><span class="line"></span><br><span class="line">row: 1066610,bi_view_real_time_sale_period_market_all</span><br></pre></td></tr></table></figure></li><li><p>删除引用</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> pg_class <span class="keyword">where</span> <span class="keyword">oid</span>=<span class="number">1066610</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> pg_depend <span class="keyword">where</span> objid=<span class="number">1066610</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> pg_depend <span class="keyword">where</span> refclassid=<span class="number">1066610</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> pg_depend <span class="keyword">where</span> refobjid=<span class="number">1066610</span>;</span><br></pre></td></tr></table></figure></li><li><p>删除type</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">drop</span> <span class="keyword">type</span>  bi_view_real_time_sale_period_market_all;</span><br></pre></td></tr></table></figure></li><li><p>重建视图,执行成功</p></li></ul></li></ul><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2022/12/07/">leeblog.icu/2022/12/07/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 技术 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> postgres </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Arch系统磁盘空间清理</title>
       <link href="2022/08/22/"/>
       <url>2022/08/22/</url>
@@ -203,9 +228,9 @@
       
         <tags>
             
-            <tag> 插件 </tag>
-            
             <tag> 工具 </tag>
+            
+            <tag> 插件 </tag>
             
         </tags>
       
@@ -290,11 +315,11 @@
       
         <tags>
             
-            <tag> 工具 </tag>
-            
             <tag> GIT </tag>
             
             <tag> 开发规范 </tag>
+            
+            <tag> 工具 </tag>
             
         </tags>
       

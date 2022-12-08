@@ -6,7 +6,7 @@
   <link href="leeblog.icu/atom.xml" rel="self"/>
   
   <link href="leeblog.icu/"/>
-  <updated>2022-08-22T15:55:34.803Z</updated>
+  <updated>2022-12-08T14:22:57.351Z</updated>
   <id>leeblog.icu/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>主机暴毙，PG驾崩，视图数据损坏修复过程</title>
+    <link href="leeblog.icu/2022/12/07/"/>
+    <id>leeblog.icu/2022/12/07/</id>
+    <published>2022-12-07T12:30:19.000Z</published>
+    <updated>2022-12-08T14:22:57.351Z</updated>
+    
+    <content type="html"><![CDATA[<figure class="highlight subunit"><table><tr><td class="code"><pre><span class="line"><span class="keyword">ERROR:  </span>could not open file &quot;base/67201/11128463&quot;: No such file or directory</span><br></pre></td></tr></table></figure><figure class="highlight subunit"><table><tr><td class="code"><pre><span class="line"><span class="keyword">ERROR:  </span>cache lookup failed for relation 11128951</span><br></pre></td></tr></table></figure><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>测试环境postgreSQL数据库是以docker容器部署的单节点服务，机器在本地机房里。</p><p>测试服务器又又又突然挂了，重启机器后pg又又未能重启，参照<a href="https://leeblog.icu/2022/05/24/">记录机器断电后PG故障的解决</a><br>解决后，成功启动。</p><p>但成功启动后发现部分物化视图查询报错</p><figure class="highlight livecodeserver"><table><tr><td class="code"><pre><span class="line">could <span class="keyword">not</span> <span class="built_in">open</span> <span class="built_in">file</span> <span class="string">&quot;base/67201/11128463&quot;</span>: No such <span class="built_in">file</span> <span class="keyword">or</span> <span class="built_in">directory</span></span><br></pre></td></tr></table></figure><h2 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h2><ul><li><p>猜测是由于服务器挂掉的时候，物化视图正在执行更新操作，突然断开导致视图数据文件损坏。</p></li><li><p>遂尝试刷新物化视图，以期待能够重建数据文件</p>  <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">refresh materialized view  bi_view_real_time_sale_period_market_all;</span><br></pre></td></tr></table></figure><p>不曾想又报了一错：</p>  <figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line">[XX000] ERROR: <span class="keyword">cache</span> lookup failed for relation <span class="number">11128466</span></span><br></pre></td></tr></table></figure></li><li><p>可想而知该视图已被锁定<br>尝试删除视图，失败，同样的锁定错误。</p></li><li><p>遂进行引用删除（注意备份视图创建语句）</p><ul><li><p>查询视图oid</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">oid</span>, relname,relfilenode <span class="keyword">from</span> pg_class <span class="keyword">where</span> relname <span class="keyword">like</span> <span class="string">&#x27;%bi_view_real_time_sale_period_market_all%&#x27;</span>;</span><br><span class="line"></span><br><span class="line">row: 1066610,bi_view_real_time_sale_period_market_all</span><br></pre></td></tr></table></figure></li><li><p>删除引用</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> pg_class <span class="keyword">where</span> <span class="keyword">oid</span>=<span class="number">1066610</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> pg_depend <span class="keyword">where</span> objid=<span class="number">1066610</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> pg_depend <span class="keyword">where</span> refclassid=<span class="number">1066610</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> pg_depend <span class="keyword">where</span> refobjid=<span class="number">1066610</span>;</span><br></pre></td></tr></table></figure></li><li><p>删除type</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">drop</span> <span class="keyword">type</span>  bi_view_real_time_sale_period_market_all;</span><br></pre></td></tr></table></figure></li><li><p>重建视图,执行成功</p></li></ul></li></ul><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2022/12/07/">leeblog.icu/2022/12/07/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
+    
+    
+    <summary type="html">测试服务器又又又突然挂了，重启机器后pg又又未能重启，一番操作后，成功启动。但成功启动后发现部分物化视图查询报错...</summary>
+    
+    
+    
+    <category term="技术" scheme="leeblog.icu/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="postgres" scheme="leeblog.icu/tags/postgres/"/>
+    
+  </entry>
   
   <entry>
     <title>Arch系统磁盘空间清理</title>
@@ -188,9 +209,9 @@
     <category term="工具" scheme="leeblog.icu/categories/%E6%8A%80%E6%9C%AF/%E5%B7%A5%E5%85%B7/"/>
     
     
-    <category term="插件" scheme="leeblog.icu/tags/%E6%8F%92%E4%BB%B6/"/>
-    
     <category term="工具" scheme="leeblog.icu/tags/%E5%B7%A5%E5%85%B7/"/>
+    
+    <category term="插件" scheme="leeblog.icu/tags/%E6%8F%92%E4%BB%B6/"/>
     
   </entry>
   
@@ -263,11 +284,11 @@
     <category term="工具" scheme="leeblog.icu/categories/%E6%8A%80%E6%9C%AF/%E5%B7%A5%E5%85%B7/"/>
     
     
-    <category term="工具" scheme="leeblog.icu/tags/%E5%B7%A5%E5%85%B7/"/>
-    
     <category term="GIT" scheme="leeblog.icu/tags/GIT/"/>
     
     <category term="开发规范" scheme="leeblog.icu/tags/%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83/"/>
+    
+    <category term="工具" scheme="leeblog.icu/tags/%E5%B7%A5%E5%85%B7/"/>
     
   </entry>
   
@@ -451,27 +472,6 @@
     
     
     <summary type="html">最后两三次，最后两三次分别时，我每次都会对他说：三儿啊，我们永远不知道哪次是这辈子最后一次。然后颤巍巍掏出早已写好的纸条...</summary>
-    
-    
-    
-    <category term="随笔" scheme="leeblog.icu/categories/%E9%9A%8F%E7%AC%94/"/>
-    
-    
-    <category term="随笔" scheme="leeblog.icu/tags/%E9%9A%8F%E7%AC%94/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>多多</title>
-    <link href="leeblog.icu/2019/06/14/"/>
-    <id>leeblog.icu/2019/06/14/</id>
-    <published>2019-06-14T15:50:30.000Z</published>
-    <updated>2022-05-23T03:25:40.130Z</updated>
-    
-    <content type="html"><![CDATA[<p>二零一九年，六月十四日。</p><p>今天周五，晚上与老高约了去撸串，店外面的桌椅似乎坐满了人，于是与老板说了一通，最终搬屋里一张桌子出来。</p><p>周边有两个嬉耍的小朋友，见我们搬了桌子出来，似乎盯了我一眼，似乎私占了他们的领土。刚要写菜单，却发现没有笔，抬头四顾，不一会儿便见刚刚的一个小朋友拿了支笔出来，这才细细看了眼，短发，大眼睛，肉嘟嘟，大概七八岁的样子，甚是可爱。我想这大概便是老板的女儿了。</p><p>饮酒过半，桌上餐巾纸没了，我看那小朋友的小伙伴不知何时被家长领走，一个人自己在那无所事事，便有意逗她，招她来说，“兄弟，这餐巾纸没了”，她犹豫了下，似乎装作不情愿似的，拿上纸盒便往屋里走。不一会儿，便随着店员屁股后面慢悠悠的来了，”哈哈你太认真了，不必要拿纸盒装一下的”店员一边嬉笑她，一边拿着一摞餐巾纸过来放下，她忿忿不平，一双大眼睛忽闪忽闪的看着我，却也没说什么。我已有醉意，也一脸肆虐幸灾乐祸的看着她。</p><p>不一会儿，她像是报复一般，趁我碰杯时把我烟盒突然拿去，却发现那是个空盒，我不明就里，却更是开心，得意洋洋的看着她。然而我立即发现她的用意，因为她继而把我另一盒香烟夺去，然后跑出几米，更加得意洋洋的看着我，把那盒香烟放在了地上，我觉得好笑。只得起身去拿回来，还是放到了桌子上，仿佛等着她来拿一样。故意逗她，装作不注意，等她要来拿时，就立即攥在手里，使她不得逞。却防不住她，她又一次得手，且放到了更远的地方，我便又去捡。如此反复，直到我累的不愿再动，任她去放。她便来以胜利者的姿态来取笑我了：“就这么近你都不捡，你是老爷爷么”</p><p>我说“你说是，那就是吧，你赢了”；于是她笑了，极大声，像是被晚风摇着的银铃。又像是宣告胜利一样喊起来“老爷爷，长头发小胡子老爷爷”；惹得邻桌的几位姑娘纷纷侧目。我不免老脸一红，怕老板误会我占人便宜，便起身匆匆进店结账欲逃。出得店门来，老高又与她招呼，“我们走了呦小朋友”，她自然客客气气装作乖巧的跟他回应“再见”，却又瞧到随后的我，又大声喊道“再见，老爷爷”。吾自不敢应，落荒而逃，只听的身后大小姑娘一片笑声。</p><hr><p>后记：酒劲上来，便想听李志的歌《不多》，无奈本地并没下载，于是搜遍各大音乐平台，均见不得李志半点信息。心中便又一股悲哀。还是去了YouTube内心才得以快慰。</p><p>特附上歌词，以示怀念：</p><p>不多 - 李志<br>词：李志    曲：李志</p><p>多多你不要哭<br>长大你就会清楚<br>这世界没有人<br>对你真的在乎</p><p>多多你不要怕<br>我不会逼你学吉他<br>你是你我是我<br>各有各的想法</p><p>不久以后的某天<br>我就这样的老了<br>你不用装作多么的难过<br>你是你我是我<br>谁都难免会孤独<br>你是你我是我<br>谁都难免会寂寞</p><p>多多你别问我<br>生活到底是什么<br>他们人类没道理<br>我不懂的太多</p><p>多多你别害怕<br>如果你真的爱上他<br>用真心用真情<br>别管以后的结果</p><p>必然有那么一天<br>你就突然离开我<br>你不要装作多么的眷恋<br>你走吧你笑吧<br>你找寻你自己吧</p><p>也许不久的某天<br>我突然就离开你<br>你不要装作多么的眷恋<br>你走吧你笑吧<br>你找寻你自己吧<br>你走吧你笑吧<br>你找寻你自己吧 </p><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2019/06/14/">leeblog.icu/2019/06/14/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
-    
-    
-    <summary type="html">于是她笑了，极大声，像是被晚风摇着的银铃</summary>
     
     
     
