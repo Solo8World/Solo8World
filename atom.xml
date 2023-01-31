@@ -6,7 +6,7 @@
   <link href="leeblog.icu/atom.xml" rel="self"/>
   
   <link href="leeblog.icu/"/>
-  <updated>2023-01-28T10:18:04.500Z</updated>
+  <updated>2023-01-31T15:18:04.922Z</updated>
   <id>leeblog.icu/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>PG实践踩坑记录</title>
+    <link href="leeblog.icu/2023/01/31/"/>
+    <id>leeblog.icu/2023/01/31/</id>
+    <published>2023-01-31T09:57:30.000Z</published>
+    <updated>2023-01-31T15:18:04.922Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote><p>记录一下找bug过程中与思维惯性相悖的千奇百怪记录找bug过程中与思维惯性相悖的千奇百怪,不间断更新</p></blockquote><hr><h3 id="ID自增序列"><a href="#ID自增序列" class="headerlink" title="ID自增序列"></a>ID自增序列</h3><ul><li><p>你有一张id自增的表，id自增至99。</p></li><li><p>A同事执行了指定id值的插入语句 <code>INSERT INTO XXX （id，value） VALUES（100，&#39;李大本事&#39;）；</code></p></li><li><p>B同事再执行不指定id值的插入语句 <code>INSERT INTO XXX （value） VALUES（&#39;李白&#39;）；</code></p></li><li><p>此时报错<code>id already exists</code></p><p>请执行以下sql后再次执行插入：</p></li></ul><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> setval(<span class="string">&#x27;bi_data_sale_order_detail_id_seq&#x27;</span>, </span><br><span class="line">              (<span class="keyword">SELECT</span> <span class="keyword">MAX</span>(<span class="keyword">id</span>) <span class="keyword">FROM</span> bi_data_sale_order_detail));</span><br></pre></td></tr></table></figure><hr><h3 id="数值的类型与保留位数"><a href="#数值的类型与保留位数" class="headerlink" title="数值的类型与保留位数"></a>数值的类型与保留位数</h3><p>  根据产品需求，你需要一个3与13的百分比比值，要求结果（比值）保留两位小数。</p><p>  <code>select round(3/13,4)*100；</code>执行这个sql你只会得到0；</p><p>  <code>select round(3::numeric/13::numeric,4)*100；</code>执行这个sql，你大概率会得到一个肉眼看起来是23.08的数字,直到你发现程序bug前这不会有什么问题。</p><p>  <code>select ((round(3::numeric/13::numeric,4))*100)::varchar；</code>再次执行这个sql，你才能看到这个结果的真正面目—他其实是‘23.0800’；</p><p>  最终，你只能这么干，  <code>select round(round(3::numeric/13::numeric,4)*100,2);</code></p><hr><h3 id="DataGrip与array-agg与时区"><a href="#DataGrip与array-agg与时区" class="headerlink" title="DataGrip与array_agg与时区"></a>DataGrip与array_agg与时区</h3><p>这个坑只在DataGrip有复现，指定数据库连接参数-Duser.timezone=PRC，执行以下sql。</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">with</span> <span class="keyword">test</span> <span class="keyword">as</span> (<span class="keyword">select</span>  <span class="keyword">now</span>() <span class="keyword">as</span> d)</span><br><span class="line"><span class="keyword">select</span> array_agg(d),d <span class="keyword">from</span> <span class="keyword">test</span> <span class="keyword">group</span> <span class="keyword">by</span> d;</span><br></pre></td></tr></table></figure><p>  会发现两个d值发生了时区不一致。</p><p>  只能转为varchar来规避该问题。</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">with</span> <span class="keyword">test</span> <span class="keyword">as</span> (<span class="keyword">select</span>  <span class="keyword">now</span>() <span class="keyword">as</span> d)</span><br><span class="line"><span class="keyword">select</span> array_agg(d::<span class="built_in">varchar</span>),d <span class="keyword">from</span> <span class="keyword">test</span> <span class="keyword">group</span> <span class="keyword">by</span> d;</span><br></pre></td></tr></table></figure><hr><h3 id="week的-date-part-与date-trunc"><a href="#week的-date-part-与date-trunc" class="headerlink" title="week的 date_part 与date_trunc"></a>week的 date_part 与date_trunc</h3><p>根据产品需求按周统计数据：</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> date_part(<span class="string">&#x27;year&#x27;</span>::<span class="built_in">text</span>, order_date) <span class="keyword">AS</span> <span class="keyword">year</span>,</span><br><span class="line">       date_part(<span class="string">&#x27;week&#x27;</span>::<span class="built_in">text</span>, order_date) <span class="keyword">AS</span> <span class="keyword">week</span></span><br><span class="line"><span class="keyword">from</span> xxx</span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> date_part(<span class="string">&#x27;year&#x27;</span>::<span class="built_in">text</span>, order_date) <span class="keyword">AS</span> <span class="keyword">year</span>, date_part(<span class="string">&#x27;week&#x27;</span>::<span class="built_in">text</span>, order_date) <span class="keyword">AS</span> <span class="keyword">week</span></span><br></pre></td></tr></table></figure><p>直到执行以下sql：</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span>   date_part(<span class="string">&#x27;year&#x27;</span>::<span class="built_in">text</span>,<span class="string">&#x27;2022-01-01&#x27;</span>::<span class="built_in">date</span>)                                       <span class="keyword">AS</span> <span class="keyword">year</span>,</span><br><span class="line">            date_part(<span class="string">&#x27;week&#x27;</span>::<span class="built_in">text</span>,<span class="string">&#x27;2022-01-01&#x27;</span>::<span class="built_in">date</span>)                                       <span class="keyword">AS</span> <span class="keyword">week</span></span><br></pre></td></tr></table></figure><p>应修改为：</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span>   date_part(<span class="string">&#x27;year&#x27;</span>::<span class="built_in">text</span>, date_trunc(<span class="string">&#x27;week&#x27;</span>::<span class="built_in">text</span>,<span class="string">&#x27;2022-01-01&#x27;</span>::<span class="built_in">date</span>) )    <span class="keyword">AS</span> <span class="keyword">year</span>,</span><br><span class="line">            date_part(<span class="string">&#x27;week&#x27;</span>::<span class="built_in">text</span>,<span class="string">&#x27;2022-01-01&#x27;</span>::<span class="built_in">date</span>)                                           <span class="keyword">AS</span> <span class="keyword">week</span></span><br></pre></td></tr></table></figure><hr><h3 id="week的计算-与ISO8601标准"><a href="#week的计算-与ISO8601标准" class="headerlink" title="week的计算 与ISO8601标准"></a>week的计算 与ISO8601标准</h3><p>一直粗暴理解pg的周计算标准是以第一个周一来算第一周：</p><p>直到执行以下sql：</p><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> date_part(<span class="string">&#x27;WEEK&#x27;</span>,<span class="string">&#x27;2020-01-01&#x27;</span>::<span class="built_in">date</span>);</span><br><span class="line"><span class="keyword">SELECT</span> date_part(<span class="string">&#x27;WEEK&#x27;</span>,<span class="string">&#x27;2022-01-01&#x27;</span>::<span class="built_in">date</span>);</span><br></pre></td></tr></table></figure><p>查阅相关资料后发现，周数计算是按照ISO8601标准来的：</p><p>ISO 8601中关于星期规定如下：<br>该年度的1月1日，如果是星期一，星期二，星期三，星期四，那么，1月1日所在的星期就是该年度的第一个星期。<br>该年度的1月1日，如果是星期五，星期六，星期日，那么1月1日所在的星期就是上一年的最后一个星期。<br>每个星期以星期一为开始，星期日为结束。</p><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2023/01/31/">leeblog.icu/2023/01/31/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
+    
+    
+    <summary type="html">记录一下找bug过程中与思维惯性相悖的千奇百怪记录找bug过程中与思维惯性相悖的千奇百怪,不间断更新</summary>
+    
+    
+    
+    <category term="技术" scheme="leeblog.icu/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="postgres" scheme="leeblog.icu/tags/postgres/"/>
+    
+  </entry>
   
   <entry>
     <title>关于一个单领域单轮对话任务型问答系统的调研与设计</title>
@@ -451,27 +472,6 @@
     
     
     <summary type="html">我想起了我们的园艺师，那个一直披着黑色的长长的几乎垂地的风衣，穿梭在长长的走廊里照料这里花草的女人</summary>
-    
-    
-    
-    <category term="随笔" scheme="leeblog.icu/categories/%E9%9A%8F%E7%AC%94/"/>
-    
-    
-    <category term="随笔" scheme="leeblog.icu/tags/%E9%9A%8F%E7%AC%94/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>正经人不写日记</title>
-    <link href="leeblog.icu/2019/09/17/"/>
-    <id>leeblog.icu/2019/09/17/</id>
-    <published>2019-09-17T14:45:20.000Z</published>
-    <updated>2022-05-23T03:27:28.986Z</updated>
-    
-    <content type="html"><![CDATA[<p>九月十七日。胸肌开始有了点儿弧度，胳膊上的N头肌明显硬实了，但是并没有明显增肌，腹部肌肉没有明显变化。</p><p>老黄要转行了，不知道面试怎么样。前些天他推荐的那本书看完了，我并不看好。无非是东拼西凑哗众取宠，但还是用沉默结束了我们的争论。</p><p>表弟有了女朋友，大表姐二表姐专程来北京“把关”，他们来那天，我在后海陪大爷演奏，从黄昏到夜幕降临。</p><p>我妈打电话，说你舅你舅妈都好满意，说我虽然不着急但也要先瞅着，我说你儿子忙着星辰大海呢，没空恋爱。可我还是为我舅感到高兴，我能想到他那种幸福满足的笑意。</p><p>朋友又辞职了，他说生活好难啊，我无言以对。其实我想说生活确实很难，但你那不过是生存而已，有些人努力勤奋一辈子，也注定只是个努力且勤奋的普通人。</p><p>可是我不能这么说，只能等我们自己头破血流后顿悟，也包括自己。</p><p>晚安。</p><p>我有些想我的小仓鼠了。</p><p><strong>本文作者</strong>：Lee<br/><strong>本文地址</strong>： <a href="leeblog.icu/2019/09/17/">leeblog.icu/2019/09/17/</a> <br/><strong>版权声明</strong>：本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC 4.0 BY-NC-SA</a> 许可协议。转载请注明出处！</p>]]></content>
-    
-    
-    <summary type="html">前些天他推荐的那本书看完了，我并不看好。无非是东拼西凑哗众取宠，但还是用沉默结束了我们的争论</summary>
     
     
     
