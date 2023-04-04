@@ -9,7 +9,7 @@ toc: true
 description: 我们将探讨如何使用不同的提示工程技术来实现不同的目标。ChatGPT是一款最先进的语言模型，能够生成类似人类的文本。然而，理解如何正确地向ChatGPT提问以获得我们所需的高质量输出非常重要。而这正是本书的目的
 ---
 
-> 译自《The Art of Asking ChatGPT for High-Quality Answers A Complete Guide to Prompt Engineering Techniques》这本书，
+> 译自<u>《The Art of Asking ChatGPT for High-Quality Answers A Complete Guide to Prompt Engineering Techniques》</u>这本书，
 本文的翻译全部由ChatGPT完成。其实github上已经有人完成了这项工作，只是放这里重新做了下排版更方便自己阅读。
 
 
