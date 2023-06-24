@@ -4,9 +4,9 @@ title:  LangChain+ChatGLM模型自建及评测
 date: 2023-06-24 14:23:20
 tags:
 - 工具
-  categories:
+categories:
 - [技术,工具]
-  description: 基于 langchain 的 ChatGLM 应用，实现基于可扩展知识库的问答
+description: 基于 langchain 的 ChatGLM 应用，实现基于可扩展知识库的问答
 ---
 ### 前言
 #### ChatGLM模型简介
