@@ -5,7 +5,8 @@ date: 2023-06-24 14:23:20
 tags:
 - 工具
 categories:
-- [技术,工具]
+- [AIGC]
+toc: true
 description: 基于 langchain 的 ChatGLM 应用，实现基于可扩展知识库的问答
 ---
 ### 前言
@@ -52,9 +53,11 @@ where order_amount > 0
 limit 3;
 ```
 ###### 数据集：
-![img.png](img.png)
+<img src="https://s1.ax1x.com/2023/06/24/pCtwDyt.png" width="100%">
+
 ###### 效果：
-![img_1.png](img_1.png)
+<img src="https://s1.ax1x.com/2023/06/24/pCtwrOP.png" width="100%">
+
 
 
 #### 2.2 百条统计数据转换为描述语句+行号，导入知识库
@@ -72,10 +75,11 @@ from (select row_number() over ()                                               
           limit 100) a;
 ```
 ###### 数据集：
-![img_2.png](img_2.png)
+<img src="https://s1.ax1x.com/2023/06/24/pCtw0SA.png" width="100%">
+
 ###### 效果：
-![img_3.png](img_3.png)
-![img_6.png](img_6.png)
+<img src="https://s1.ax1x.com/2023/06/24/pCtwUFe.png" width="100%">
+<img src="https://s1.ax1x.com/2023/06/24/pCtwdWd.png" width="100%">
 
 #### 2.4 千条统计数据的基础上，加入其他知识信息，导入知识库
 ```sql
@@ -91,8 +95,11 @@ from (select row_number() over ()                                               
 ```
 
 ###### 数据集：
-![img_4.png](img_4.png)
+<img src="https://s1.ax1x.com/2023/06/24/pCtwBQI.png" width="100%">
+
+
 ###### 效果：
-![img_5.png](img_5.png)
+<img src="https://s1.ax1x.com/2023/06/24/pCtwaJH.png" width="100%">
+
 
 
