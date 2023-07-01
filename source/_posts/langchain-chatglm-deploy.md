@@ -1,4 +1,4 @@
----
+11---
 layout: post
 title:  保姆级教程：如何本地部署私有chatglm模型及知识库扩展调试
 date: 2023-06-30 9:22:11
@@ -17,34 +17,25 @@ description: 如何本地部署私有chatglm模型，以及可落地的应用
 
 ### 我的部署环境
 * 系统：Ubuntu 16.04
-* 显卡：NVIDIA GeForce GTX 1080 Ti
-* 显存：11G
-* 内存：64G
+* 显卡：NVIDIA GeForce GTX 2080 Ti
+* 显存：11 G
+* 内存：64 G
 * 硬盘：1T
 
 ### 部署步骤
 
-#### 1.检查你的python版本
+#### 检查你的python版本
 ```bash
 python3 --version
 ```
-建议3.8 - 3.10最佳，如果不是，建议安装conda，创建一个新的python环境
-1.conda安装
-```bash
-wget https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
-bash Anaconda3-2021.05-Linux-x86_64.sh
-```
-2.创建新环境及激活
-```bash
-conda create -n chatglm python=3.8
-conda activate chatglm
-```
+建议python3.8 - 3.10最佳，如果不是，建议安装conda，创建一个新的python环境，详细见下文conda的安装使用
 
-#### 2.下载gitchain-chatglm代码
+#### 下载gitchain-chatglm代码
 ```bash
 git clone https://github.com/imClumsyPanda/langchain-ChatGLM.git
 ```
-#### 3.安装依赖
+
+#### 安装依赖
 需要提前安装paddleocr依赖libX11，libXext
 
 ```bash
@@ -61,25 +52,35 @@ pip install -r requirements.txt
 实在要管的话，就复制报错信息，发给chatGPT询问。
 
 
-#### 4.下载模型
+#### 下载模型
 该项目使用了两种模型，一种是在上传知识库文件时，用来语义分段和向量转化的embedding模型,如text2vec，
 一种是用来生成回复的LLM模型，如chatGLM。
 
 如果你网络环境好，人在美国刚下飞机，可以不用手动下载，直接运行python webui.py，会自动下载模型
 如果不好（大概率不好），请手动下载模型，注意这里未必需要全部下载，embedding模型和llm模型各下载一个就可以，
 手动下载模型有两个方法：
-1.使用百度网盘下载
-  1. ernie-3.0-base-zh.zip [链接](https://pan.baidu.com/s/1CIvKnD3qzE-orFouA8qvNQ?pwd=4wih)
-  2. ernie-3.0-nano-zh.zip 链接: https://pan.baidu.com/s/1Fh8fgzVdavf5P1omAJJ-Zw?pwd=q6s5
-  3. text2vec-large-chinese.zip 链接: https://pan.baidu.com/s/1sMyPzBIXdEzHygftEoyBuA?pwd=4xs7
-  4. chatglm-6b-int4-qe.zip 链接: https://pan.baidu.com/s/1DDKMOMHtNZccOOBGWIOYww?pwd=22ji
-  5. chatglm-6b-int4.zip 链接: https://pan.baidu.com/s/1pvZ6pMzovjhkA6uPcRLuJA?pwd=3gjd
-  6. chatglm-6b.zip 链接: https://pan.baidu.com/s/1B-MpsVVs1GHhteVBetaquw?pwd=djay
+
+1.使用百度网盘下载(我这边蹭的同事的会员，大概20分钟下载完毕)
+
+  a. ernie-3.0-base-zh.zip [链接](https://pan.baidu.com/s/1CIvKnD3qzE-orFouA8qvNQ?pwd=4wih)
+
+  b. ernie-3.0-nano-zh.zip [链接](https://pan.baidu.com/s/1Fh8fgzVdavf5P1omAJJ-Zw?pwd=q6s5)
+
+  c. text2vec-large-chinese.zip [链接](https://pan.baidu.com/s/1sMyPzBIXdEzHygftEoyBuA?pwd=4xs7)
+
+  d. chatglm-6b-int4-qe.zip [链接](https://pan.baidu.com/s/1DDKMOMHtNZccOOBGWIOYww?pwd=22ji)
+
+  e. chatglm-6b-int4.zip [链接](https://pan.baidu.com/s/1pvZ6pMzovjhkA6uPcRLuJA?pwd=3gjd)
+
+  f. chatglm-6b.zip [链接](https://pan.baidu.com/s/1B-MpsVVs1GHhteVBetaquw?pwd=djay)
 
 2.访问huggingface网页，找到相关模型项目，自己在电脑上建个文件夹，
 然后在hugginnface的file目录里挨个点击下载（有时候huggingface的访问会不通，多试几次）
+
 huggingface官网：https://huggingface.co/
+
 llm模型（chatglm-6b-int4）：https://huggingface.co/THUDM/chatglm-6b-int4/tree/main
+
 embedding模型（text2vec-large-chinese）：https://huggingface.co/THUDM/text2vec-large-chinese/tree/main
 
 
@@ -92,6 +93,7 @@ vim config/model_config.py
 ```
 
 在config文件里需要修改两处
+
 1.修改embedding模型路径，我的路径如下"/root/langchain/embedding/"，你的路径可能不同，需要修改
 ```python
 # 在以下字典中修改属性值，以指定本地embedding模型存储位置
@@ -146,7 +148,7 @@ LLM_MODEL = "chatglm2-6b-int4"
 ```
 
 
-#### 5.运行
+#### 运行
 ```bash
 python webui.py
 ```
@@ -193,44 +195,44 @@ conda可以帮我们快速的创建/切换python环境，
 conda分为anaconda 和 miniconda，anaconda 是一个包含了许多常用库的集合版本，miniconda 是精简版本（只包含conda、pip、zlib、python 以及它们所需的包）.
 我这里使用的是miniconda，因为我不需要anaconda中的那些库，而且anaconda的安装包比较大，下载起来比较慢。
 
-#### 1.安装conda
+### 安装conda
 ```bash
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh
 ```
 安装过程中会提示你是否将conda加入到环境变量中，选择yes即可。
-#### 2.创建新环境
+### 创建新环境
 ```bash
 conda create -n chatglm python=3.8
 ```
-#### 3.激活环境
+### 激活环境
 ```bash
 conda activate chatglm
 ```
-#### 4.退出环境
+### 退出环境
 ```bash
 conda deactivate
 ```
-#### 5.删除环境
+### 删除环境
 ```bash
 conda remove -n chatglm --all
 ```
-#### 6.查看已有环境
+### 查看已有环境
 ```bash
 conda info --envs
 ```
-#### 7.安装python库（示例，非必要）
+### 安装python库（示例，非必要）
 ```bash
 conda install -n chatglm numpy
 ```
 
 
 ## zip压缩与解压缩
-#### 1.压缩
+### 压缩
 ```bash
 zip -r chatglm.zip chatglm
 ```
-#### 2.解压缩
+### 解压缩
 ```bash
 unzip chatglm.zip
 ```
@@ -241,11 +243,11 @@ rsync是一个远程数据同步工具，可通过LAN/WAN快速同步多台主�
 我平时小文件传输一般直接scp即可，但是如果文件比较大，或者需要频繁传输，就需要用rsync了。scp是加密传输，所以相对安全，但效率也低。往往出现越传越慢的情况。
 所以这里用了rsync，速度快，效率高，但是不加密，所以不要传输敏感文件。
 
-#### 1.安装
+### 安装
 ```bash
 sudo apt install rsync
 ```
-#### 2.使用
+### 使用
 ```bash
  rsync -av --info=progress2  chatglm-6b-int4-qe.zip root@服务器ip:/root/langchain/llm/
 ```
@@ -263,7 +265,4 @@ sudo apt install rsync
 
 ## 声明 
 `本文60%的内容由github-copilot辅助提示生成，本人部署过程中50%的问题由chatGPT解答并解决。`
-
-<img src="https://s1.ax1x.com/2023/06/24/pCtwaJH.png" width="100%">
-
 
